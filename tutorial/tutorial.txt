@@ -1,0 +1,133 @@
+#######################
+## Dr. Colin Davenport
+## Wochenende pipeline: bacterial metagenome commands. April 2021
+## Intended to find bacteria
+######################
+
+#################
+# Start: Input fastq files as *R1_fastq must be in same folder. 
+# This assumes you have a SLURM cluster to run the pipeline on
+################
+
+
+
+# Segment 1, preparation, rename, run pipeline
+
+#0 Setup 
+Set up Wochenende following the commands on the Wochenende github page. Download a reference sequence and edit config.yaml
+# Now copy get_wochenende.sh to your current directory
+cp (your_wochenende_path)/get_wochenende.sh .
+
+#1 edit the location "path_we" in the following script, then run it to collect the Wochenende files and directories needed.
+nano get_wochenende.sh 
+# Now run the script to set the needed scripts and directories for the pipeline
+bash get_wochenende.sh
+
+
+#2. Wochenende needs sample names like sputum_R1.fastq and sputum_R2.fastq to run correctly. So rename your files.
+srun gunzip *.fastq.gz
+rename 's/_001//g' *.fastq
+
+# 3a - Configure the Pipeline
+nano run_Wochenende_SLURM.sh
+
+Uncomment one and only one of the pipeline commands after this line. 
+This will specify reference genome or metagenome, paired end or single end reads, etc.
+"# Run script - Paired end reads R2 will be calculated by replacing R1 with R2"
+
+
+# 3b - Run Pipeline, wait 1-2h. Format required: data_R1.fastq and data_R2.fastq, even for long reads
+bash runbatch_sbatch_Wochenende.sh 
+
+################
+###### STOP HERE, wait ca 1-2 hr until Wochenende complete #########
+################
+
+
+# 4 - Run the postprocessing scripts to automatically generate all the outputs
+
+bash wochenende_postprocess.sh 
+
+
+## If this completed successfully, this should be the end. Already. Go into the reporting and haybaler/haybaler_output
+subdirectories to see your files. Try the scripts to create heatmaps with haybaler.
+
+
+Output directories
+* plots 
+* reporting
+* reporting/haybaler/haybaler_output
+* extract
+* growth_rate
+
+Files
+* multiqc.html
+
+
+
+
+
+#############
+## If you want to do the postprocessing steps manually, you can follow the guide below. 
+## We recommend wochenende_postprocess.sh as above though
+#############
+
+# Segment2 - QC, plotting, 
+#5
+bash runbatch_metagen_awk_filter.sh
+
+#6
+bash runbatch_sambamba_depth.sh
+
+
+##############
+###### STOP HERE, wait ca 10-20m for SLURM jobs to finish  #########
+################
+
+
+## 7 Plots
+bash runbatch_metagen_window_filter.sh
+cp *window.txt* plots && cd plots
+bash runbatch_wochenende_plot.sh
+
+
+# 8 Reporting
+cd ../reporting/
+cp ../*.bam.txt .
+bash runbatch_Wochenende_reporting.sh
+mkdir unsorted && mkdir bam_txt
+#mv *rep.us* unsorted 
+#mv *.bam.txt bam_txt
+
+
+
+# 9 Check csv output using pcsv / OpenOffice / less -S etc (see rcug globalenv). Section optional!
+
+#pcsv KGCF14D_S2_R1.ndp.lc.trm.s.bam.txt.rep.s.csv			# Relatively raw file, no filtering of poorly mapped reads, no duplicate filter and allows any number of mismatches (~<10) 
+#pcsv KGCF14D_S2_R1.ndp.lc.trm.s.mq30.01mm.dup.bam.txt.rep.s.csv	# Recommended well filtered file
+
+
+
+# 10 Make XLSX in directory reporting
+
+bash runbatch_csv_to_xlsx.sh
+
+
+
+
+
+####################
+# Tasks completed.
+####################
+
+############
+Now Copy to users
+###########
+
+Directories
+* plots 
+* reporting
+
+
+Files
+* multiqc.html
