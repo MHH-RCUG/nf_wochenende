@@ -1,8 +1,7 @@
 #!/bin/bash
 # bash start.sh input.fastq
 
-#git pull && nextflow run longread_alignment.nf
-ref="/mnt/omics/data/projects/26890/uploaded/214815-ZR_S706_v1_chromosomes.fasta"
+ref=""
 fastq=$1
 
 git pull -q 
@@ -15,6 +14,33 @@ if [ -z $fastq ]
         exit
 fi
 
+# Run script - Paired end reads R2 will be calculated by replacing R1 with R2
+# Uncomment/adapt the only line you want to run
 
-# run specifying fasta reference as arg
-nextflow run longread_alignment.nf -with-timeline -with-report -with-dag flowchart.png --fasta $ref --fastq $fastq --test yes -resume
+#2021_12, minor update for 2021_10 ref. 
+ref="/mnt/ngsnfs/seqres/metagenref/bwa/2021_12_human_bact_arch_fungi_vir.fa"
+#viruses
+#ref="/mnt/ngsnfs/seqres/metagenref/bwa/EZV0_1_database2_cln.fasta"
+#ref="/mnt/ngsnfs/seqres/metagenref/bwa/nci_viruses.fa"
+
+
+
+
+
+echo "INFO: Pipeline check OK, starting job submission "
+
+
+for i in `ls *R1.fastq`
+
+        do
+                echo $i
+                #sbatch run_Wochenende_SLURM.sh $i
+                # run specifying fastq reads and fasta reference as arg
+                nextflow run run_nf_wochenende.nf  -with-timeline -with-report -with-dag flowchart.dot --fasta $ref --fastq $fastq --test yes -resume
+
+
+done
+
+
+
+

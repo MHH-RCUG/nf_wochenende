@@ -1,33 +1,27 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         Long read mapping
+                         nf_wochenende
 ========================================================================================
- Long read mapping pipeline. This read alignment requires a fastq read file and a fasta reference genome 
+ Short and long read metagenomic alignment pipeline in Nextflow. Requires a fastq read file and a bwa indexed fasta reference genome 
 
  Colin Davenport 
 
  #### Homepage / Documentation Changelog
 
 v0.1.1  
-v0.1.0  Generate stats and multiqc
-v0.0.9  Change output names, allow only one fastq input (else waits during collect steps after longshot)
-v0.0.8  bcf sorting
-v0.0.7  Adding bctftools concat for gathering VCF, and bam to cram conversion
-v0.0.6  Longshot scatter to vcf with flatten and each working
-v0.0.5  Trial -r region variant calling acceleration (alternative: bedtools makewindows on .fai)
-v0.0.4  Add memory scaling cluster retries 
-v0.0.3  Add longshot SNV calling
-v0.0.2  Minimap2 and samtools working
-v0.0.1  First working version
+v0.1.0  
+v0.0.9  
+v0.0.8  
+v0.0.7  
+v0.0.6  
+v0.0.5  
+v0.0.4   
+v0.0.2  
+v0.0.1  init
 
 
-// TODO - following short read pipeline
-// samtools stats --threads {threads} {input.bam} > {output.stats}
-// multiqc         multiqc --force --no-data-dir -n {output.html} .
-// vt normalize {input.bcf} -r {config[reference]} | vt uniq - -o {output.bcf} 2> {log}   // but is this sensible for long read SNVs?
-// filters hard = not pass:         bcftools view --apply-filters PASS -Ob --threads {threads} -o {output.bcf} {input.bcf}
-// soft = v complex, strand bias, etc
+
 
 ----------------------------------------------------------------------------------------
 */
@@ -37,8 +31,7 @@ def helpMessage() {
     Usage:
     The typical command for running the pipeline is:
       conda activate nextflow
-      nextflow run longread_alignment.nf  --fasta /path/to/x.fa 
-      //nextflow run longread_alignment --genome ZR_S706_v1 -profile conda 
+      nextflow run run_nf_wochenende.nf  --fasta /path/to/x.fa --fastq /path/x.fastq
 
     Arguments:
       --fasta [file]                  Path to Fasta reference. (Default: false)
@@ -63,9 +56,9 @@ params.help=false
 params.save_align_intermeds=true
 params.outdir = "output"
 params.publish_dir_mode = "copy"
-params.fastq = "/mnt/beegfs/scratch/bioinformatics/colin/dev/longread_alignment_nf/test_beet_big.fastq.gz"
-params.fasta = "/mnt/omics/data/projects/26890/uploaded/214815-ZR_S706_v1_chromosomes.fasta"
-params.fai = "/mnt/omics/data/projects/26890/uploaded/214815-ZR_S706_v1_chromosomes.fasta.fai"
+params.fastq = ""
+params.fasta = ""
+params.fai = ""
 params.test = "yes"
 params.min_cov = ""
 params.min_alt_count = ""
@@ -120,7 +113,7 @@ workflow {
     // Run SNP calling per chromosome (might be easier to split bams, then per bam ?)
     // Alternative - use per window: bedtools makewindows -g 214815-ZR_S706_v1_chromosomes.fasta.fai -w 10000000 > windows.fai
     // limits to .take(x) chromosomes for dev only
-    println "\n ###### Warning ! Will only perform SNP calling for these chromosomes: ######"
+    //println "\n ###### Warning ! Will only perform SNP calling for these chromosomes: ######"
     fai_channel = Channel
         .fromPath(params.fai)
         .splitText( each:{ it.split().first() } )
@@ -157,6 +150,60 @@ workflow {
     multiqc(stats.out.collect(), bam_stats.out)
 
 
+}
+
+
+# goes in nf
+#python3 run_Wochenende.py --metagenome 2021_12_meta_fungi_human_masked --threads $cpus --aligner bwamem --no_abra --mq30 --remove_mismatching 3 --readType SE --debug --no_prinseq --force_restart $fastq
+#python3 run_Wochenende.py --metagenome 2021_12_meta_fungi_human_masked --threads $cpus --aligner bwamem --no_abra --mq30 --remove_mismatching 5 --readType PE --debug --no_prinseq --force_restart $fastq
+
+
+/*
+ *  Run wochenede
+ */
+
+process wochenende {
+
+    cpus = 16
+	// If job fails, try again with more memory
+	memory { 40.GB * task.attempt }
+	errorStrategy 'retry'
+
+    conda '/home/hpc/davenpor/programs/miniconda3/envs/wochenende/'
+
+
+    tag "$name"
+    label 'process_medium'
+    
+       
+    if (params.save_align_intermeds) {
+        publishDir path: "${params.outdir}/minimap2", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith('.bam')) "$filename"
+                          else if (filename.endsWith('.bai')) "$filename"
+                          else if (filename.endsWith('.bam.txt')) "$filename"
+                          else if (filename.endsWith('.fastq')) "$filename"
+                          else filename
+                    }
+    }
+    
+
+
+    input:
+    file fastq
+
+
+    output:
+    file "${prefix}.sam"
+    
+
+    script:
+    prefix = fastq.name.toString().tokenize('.').get(0)
+    name = fastq
+
+    """
+    minimap2 -x map-ont -a --split-prefix ${prefix} -t $task.cpus  -o ${prefix}.sam $params.fasta $fastq
+    """
 }
 
 
