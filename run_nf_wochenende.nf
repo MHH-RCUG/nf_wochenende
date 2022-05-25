@@ -97,8 +97,8 @@ if (params.help) {
 
 workflow {
 
-    println "Starting longread_alignment.nf"
-    println "Version 0.1.0 by Colin Davenport"
+    println "Starting run_nf_wochenende.nf"
+    println "Version 0.0.1 by Colin Davenport"
 
     // File inputs
     input_fastq = Channel.fromPath(params.fastq, checkIfExists: true)
@@ -114,52 +114,44 @@ workflow {
     // Alternative - use per window: bedtools makewindows -g 214815-ZR_S706_v1_chromosomes.fasta.fai -w 10000000 > windows.fai
     // limits to .take(x) chromosomes for dev only
     //println "\n ###### Warning ! Will only perform SNP calling for these chromosomes: ######"
-    fai_channel = Channel
-        .fromPath(params.fai)
-        .splitText( each:{ it.split().first() } )
-        .take(9)
-        .map { [ it ] }
-        .view()
+    /**
+    *fai_channel = Channel
+    *    .fromPath(params.fai)
+    *    .splitText( each:{ it.split().first() } )
+    *    .take(9)
+    *    .map { [ it ] }
+    *    .view()
+    */
     
-    minimap2_align(input_fastq)
-    sort_bam(minimap2_align.out)
+    wochenende(input_fastq)
+    //minimap2_align(input_fastq)
+    //sort_bam(minimap2_align.out)
 
     // generate alignment stats
-    bam_stats(sort_bam.out)
+    //bam_stats(sort_bam.out)
 
     // convert bam to cram format
-    convert_bam_cram(sort_bam.out)
+    //convert_bam_cram(sort_bam.out)
     
-    // longshot, run split by chromosome -from bam
-    longshot(sort_bam.out, fai_channel.flatten())
-    
-    // longshot, run split by chromosome - from cram -smaller, preferred
-    //longshot(convert_bam_cram.out, fai_channel.flatten())
- 
-    // concatenate vcf.gz to bcf. 
-    //concat_bcf(reheader_vcfs.out)
-    concat_bcf(longshot.out.collect())
 
     // sort bcf results
-    sort_bcf(concat_bcf.out)
+    //sort_bcf(concat_bcf.out)
 
     // generate bcf stats
-    stats(sort_bcf.out)
+    //stats(sort_bcf.out)
 
     // multiqc
-    multiqc(stats.out.collect(), bam_stats.out)
+    //multiqc(stats.out.collect(), bam_stats.out)
 
 
 }
 
 
-# goes in nf
-#python3 run_Wochenende.py --metagenome 2021_12_meta_fungi_human_masked --threads $cpus --aligner bwamem --no_abra --mq30 --remove_mismatching 3 --readType SE --debug --no_prinseq --force_restart $fastq
-#python3 run_Wochenende.py --metagenome 2021_12_meta_fungi_human_masked --threads $cpus --aligner bwamem --no_abra --mq30 --remove_mismatching 5 --readType PE --debug --no_prinseq --force_restart $fastq
 
 
 /*
- *  Run wochenede
+ *  Run wochenende
+ *  Parcels the python script into a single Nextflow process
  */
 
 process wochenende {
@@ -194,7 +186,7 @@ process wochenende {
 
 
     output:
-    file "${prefix}.sam"
+    file "${prefix}.bam"
     
 
     script:
@@ -202,8 +194,10 @@ process wochenende {
     name = fastq
 
     """
-    minimap2 -x map-ont -a --split-prefix ${prefix} -t $task.cpus  -o ${prefix}.sam $params.fasta $fastq
+    python3 run_Wochenende.py --ref ${params.fasta} --threads $task.cpus --aligner bwamem --no_abra --mq30 --remove_mismatching 3 --readType SE --debug --no_prinseq --force_restart $fastq
+
     """
+    //minimap2 -x map-ont -a --split-prefix ${prefix} -t $task.cpus  -o ${prefix}.sam $params.fasta $fastq
 }
 
 
