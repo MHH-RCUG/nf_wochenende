@@ -1,33 +1,27 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         Long read mapping
+                         nf_wochenende
 ========================================================================================
- Long read mapping pipeline. This read alignment requires a fastq read file and a fasta reference genome 
+ Short and long read metagenomic alignment pipeline in Nextflow. Requires a fastq read file and a bwa indexed fasta reference genome 
 
  Colin Davenport 
 
  #### Homepage / Documentation Changelog
 
 v0.1.1  
-v0.1.0  Generate stats and multiqc
-v0.0.9  Change output names, allow only one fastq input (else waits during collect steps after longshot)
-v0.0.8  bcf sorting
-v0.0.7  Adding bctftools concat for gathering VCF, and bam to cram conversion
-v0.0.6  Longshot scatter to vcf with flatten and each working
-v0.0.5  Trial -r region variant calling acceleration (alternative: bedtools makewindows on .fai)
-v0.0.4  Add memory scaling cluster retries 
-v0.0.3  Add longshot SNV calling
-v0.0.2  Minimap2 and samtools working
-v0.0.1  First working version
+v0.1.0  
+v0.0.9  
+v0.0.8  
+v0.0.7  
+v0.0.6  
+v0.0.5  
+v0.0.4   
+v0.0.2  
+v0.0.1  init
 
 
-// TODO - following short read pipeline
-// samtools stats --threads {threads} {input.bam} > {output.stats}
-// multiqc         multiqc --force --no-data-dir -n {output.html} .
-// vt normalize {input.bcf} -r {config[reference]} | vt uniq - -o {output.bcf} 2> {log}   // but is this sensible for long read SNVs?
-// filters hard = not pass:         bcftools view --apply-filters PASS -Ob --threads {threads} -o {output.bcf} {input.bcf}
-// soft = v complex, strand bias, etc
+
 
 ----------------------------------------------------------------------------------------
 */
@@ -37,7 +31,7 @@ def helpMessage() {
     Usage:
     The typical command for running the pipeline is:
       conda activate nextflow
-      nextflow run longread_alignment.nf  --fasta /path/to/x.fa 
+      nextflow run nf_wochenende.nf  --fasta /path/to/x.fa --fastq /path/x.fastq
       //nextflow run longread_alignment --genome ZR_S706_v1 -profile conda 
 
     Arguments:
@@ -63,9 +57,9 @@ params.help=false
 params.save_align_intermeds=true
 params.outdir = "output"
 params.publish_dir_mode = "copy"
-params.fastq = "/mnt/beegfs/scratch/bioinformatics/colin/dev/longread_alignment_nf/test_beet_big.fastq.gz"
-params.fasta = "/mnt/omics/data/projects/26890/uploaded/214815-ZR_S706_v1_chromosomes.fasta"
-params.fai = "/mnt/omics/data/projects/26890/uploaded/214815-ZR_S706_v1_chromosomes.fasta.fai"
+params.fastq = ""
+params.fasta = ""
+params.fai = ""
 params.test = "yes"
 params.min_cov = ""
 params.min_alt_count = ""
@@ -104,8 +98,8 @@ if (params.help) {
 
 workflow {
 
-    println "Starting longread_alignment.nf"
-    println "Version 0.1.0 by Colin Davenport"
+    println "Starting nf_wochenende.nf"
+    println "Version 0.0.1 by Colin Davenport"
 
     // File inputs
     input_fastq = Channel.fromPath(params.fastq, checkIfExists: true)
