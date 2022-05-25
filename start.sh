@@ -32,6 +32,9 @@ fastp=""
 #trim_galore="--trim_galore"
 trim_galore=""
 
+## OR -- easier like this ?
+settings="minimap2long --remove_mismatching 250"
+
 
 git pull -q 
 
@@ -81,6 +84,7 @@ for i in `ls *R1.fastq`
                 --debug $debug   \
                 --fastqc $fastqc \
                 --trim_galore $trim_galore \
+                --setting $settings
                 -resume
 
 
