@@ -2,18 +2,19 @@
 # bash start.sh input.fastq
 
 # Uncomment the following to use them in the nextflow submission script below
+# Commented out means deactivated!
 #ref=""
 fastq=$1
 #aligner="bwamem"
 #aligner="minimap2short"
-aligner="minimap2long"
+aligner="minimap2long" 
 #aligner="ngmlr"
 #mismatches="--remove_mismatching 3"
 mismatches="--remove_mismatching 250"
-nextera=""
-#nextera="--nextera"
-#abra=""
-abra="--no_abra"
+nextera_msg=""
+#nextera_msg="--nextera"
+#abra_msg=""
+abra_msg="--no_abra"
 #mapping_quality="--mq20"
 mapping_quality="--mq30"
 readType="SE"
@@ -21,10 +22,15 @@ readType="SE"
 debug="--debug"
 longread="--longread"
 no_dup_removal="--no_duplicate_removal"
-no_prinseq="--no_prinseq"
-no_fastqc="no_fastqc"
-fastp="--fastp"
-trim_galore="--trim_galore"
+#no_dup_removal=""
+prinseq="--no_prinseq"
+#prinseq=""
+fastqc="no_fastqc"
+#fastqc=""
+#fastp="--fastp"
+fastp=""
+#trim_galore="--trim_galore"
+trim_galore=""
 
 
 git pull -q 
@@ -36,6 +42,9 @@ if [ -z $fastq ]
         echo "## Usage: Input fastq required. bash start.sh in.fastq ## "
         exit
 fi
+
+### TODO check This scripts args! only 1 variable of each type uncommented above!
+
 
 # Run script - Paired end reads R2 will be calculated by replacing R1 with R2
 # Uncomment/adapt the only line you want to run
@@ -64,8 +73,14 @@ for i in `ls *R1.fastq`
                 --fastq $fastq \
                 --test yes  \
                 --aligner $aligner \
-                --mismatches $mismatches
-                
+                --mismatches $mismatches \
+                --longread $longread \
+                --nextera_msg $nextera_msg \
+                --prinseq $prinseq \
+                --abra_msg $abra_msg  \
+                --debug $debug   \
+                --fastqc $fastqc \
+                --trim_galore $trim_galore \
                 -resume
 
 
