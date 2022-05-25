@@ -59,6 +59,7 @@ params.publish_dir_mode = "copy"
 params.fastq = ""
 params.fasta = ""
 params.fai = ""
+params.aligner = ""
 params.test = "yes"
 params.min_cov = ""
 params.min_alt_count = ""
@@ -194,7 +195,7 @@ process wochenende {
     name = fastq
 
     """
-    python3 run_Wochenende.py --ref ${params.fasta} --threads $task.cpus --aligner bwamem --no_abra --mq30 --remove_mismatching 3 --readType SE --debug --no_prinseq --force_restart $fastq
+    python3 run_Wochenende.py --ref ${params.fasta} --threads $task.cpus --aligner $params.aligner --no_abra --mq30 --remove_mismatching 3 --readType SE --debug --no_prinseq --force_restart $fastq
 
     """
     //minimap2 -x map-ont -a --split-prefix ${prefix} -t $task.cpus  -o ${prefix}.sam $params.fasta $fastq

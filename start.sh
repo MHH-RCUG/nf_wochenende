@@ -1,8 +1,10 @@
 #!/bin/bash
 # bash start.sh input.fastq
 
-ref=""
+#ref=""
 fastq=$1
+#aligner="bwamem"
+aligner="minimap2"
 
 git pull -q 
 
@@ -27,7 +29,7 @@ ref="/mnt/ngsnfs/seqres/metagenref/bwa/2021_12_human_bact_arch_fungi_vir.fa"
 
 
 
-echo "INFO: Pipeline check OK, starting job submission "
+echo "INFO: Arguments check OK, starting job submission "
 
 
 for i in `ls *R1.fastq`
@@ -36,7 +38,12 @@ for i in `ls *R1.fastq`
                 echo $i
                 #sbatch run_Wochenende_SLURM.sh $i
                 # run specifying fastq reads and fasta reference as arg
-                nextflow run run_nf_wochenende.nf  -with-timeline -with-report -with-dag flowchart.dot --fasta $ref --fastq $fastq --test yes -resume
+                nextflow run run_nf_wochenende.nf  -with-timeline -with-report -with-dag flowchart.dot \
+                --fasta $ref \
+                --fastq $fastq \
+                --test yes  \
+                --aligner $aligner \
+                -resume
 
 
 done
