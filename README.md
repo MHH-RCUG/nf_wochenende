@@ -1,7 +1,7 @@
 
 # nf_wochenende - a nextflow implementation of the Wochenende pipeline
 
-See main repository https://github.dev/MHH-RCUG/Wochenende
+**See documentation on our Wiki** at https://github.com/MHH-RCUG/nf_wochenende/wiki
 
 Work in progress (Spring-Summer 2022).
 
