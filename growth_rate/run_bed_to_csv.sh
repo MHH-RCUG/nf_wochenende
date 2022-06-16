@@ -28,8 +28,8 @@ eval $(parse_yaml $WOCHENENDE_DIR/config.yaml)
 haybaler_dir=$HAYBALER_DIR
 wochenende_dir=$WOCHENENDE_DIR
 # Set and activate existing conda env
-. $CONDA_SH_PATH
-conda activate $WOCHENENDE_CONDA_ENV_NAME
+#. $CONDA_SH_PATH
+#conda activate $WOCHENENDE_CONDA_ENV_NAME
 
 # check if env variables could be defined.
 if [[ -z "${WOCHENENDE_DIR}" || -z "${HAYBALER_DIR}" ]]; then
