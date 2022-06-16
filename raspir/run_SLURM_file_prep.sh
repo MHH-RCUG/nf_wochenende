@@ -19,10 +19,10 @@
 #SBATCH --job-name=raspir_prepare
 
 # Add miniconda3 to PATH. TODO - autodetection
-. /mnt/ngsnfs/tools/miniconda3/etc/profile.d/conda.sh
+#. /mnt/ngsnfs/tools/miniconda3/etc/profile.d/conda.sh
 
 # Activate env on cluster node
-conda activate raspir_env >> /dev/null
+#conda activate raspir_env >> /dev/null
 
 cpus=8
 human_chr_pattern="1_1_1"
@@ -55,13 +55,13 @@ if [ $count != 0 ]
 		done
 fi
 
-# Start from sorted mq20 BAM with no unmapped sequences  
+# Start from sorted mq20 BAM with no unmapped sequences
 #for items in *.bam
 #	do
 		#echo $items
 #		fname=$(echo ${items} | sed 's/.bam//')
 		#echo $fname
-#########		
+########
 # Faster version, allow parallel samtools depth, but keep as close to original as possible
 ########
 bam_fullname=$1
