@@ -12,4 +12,3 @@ mv *.bam.txt stats
 mv *_out fastqc
 srun -c 56 pigz -p 56 *.fastq &
 
-

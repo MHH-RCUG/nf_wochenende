@@ -9,16 +9,6 @@
 # Setup SLURM using data parsed from config.yaml
 source $WOCHENENDE_DIR/scripts/parse_yaml.sh
 eval $(parse_yaml $WOCHENENDE_DIR/config.yaml)
-# Setup job scheduler
-# use SLURM job scheduler (yes, no)
-if [[ "${USE_CUSTOM_SCHED}" == "yes" ]]; then
-    #echo USE_CUSTOM_SCHED set"
-    scheduler=$CUSTOM_SCHED_CUSTOM_PARAMS_SINGLECORE
-fi
-if [[ "${USE_SLURM}" == "yes" ]]; then
-    #echo USE_SLURM set"
-    scheduler=$SLURM_CUSTOM_PARAMS_SINGLECORE
-fi
 
 # Run samtools stats
 echo "INFO:  Running samtools stats"
@@ -27,7 +17,7 @@ if [[ $count != 0 ]]
     then
 	for bam in `ls *trm.s.bam`
 		do
-		$scheduler $path_samtools stats $bam > $bam.stats &
+		$path_samtools stats $bam > $bam.stats &
 	done
 fi
 wait
@@ -37,7 +27,7 @@ if [[ $count != 0 ]]
     then
     for bam in `ls *fix.s.bam`
 		do
-		$scheduler $path_samtools stats $bam > $bam.stats &
+		$path_samtools stats $bam > $bam.stats &
 	done
 fi
 wait
@@ -47,7 +37,7 @@ if [[ $count != 0 ]]
 	then
 	for bam in `ls *calmd.bam`
 		do
-		$scheduler $path_samtools stats $bam > $bam.stats &
+		$path_samtools stats $bam > $bam.stats &
 	done
 fi
 wait
@@ -55,7 +45,7 @@ wait
 # Run multiqc
 if [[ "${USE_MULTIQC}" == "yes" ]]; then
 	echo "INFO:  Running multiqc"
-	$scheduler multiqc -f .  2>&1 &
+	multiqc -f .  2>&1 &
 fi
 
 
@@ -66,7 +56,7 @@ echo "Wochenende mapping stats" > $out
 for file in `ls *flagstat.txt`
 	do
 	echo -n $file "\t"  >> $out
-	$scheduler grep "mapped (" $file >> $out
+	grep "mapped (" $file >> $out
 done
 
 
