@@ -5,7 +5,7 @@
 git pull -q
 
 # run pipeline, no bash variables allowed as empty strings evaluate to true in groovy
-nextflow run run_nf_wochenende.nf  -with-timeline -with-report -with-dag flowchart.dot --metagenome SB_S706 --aligner minimap2long --remove_mismatching 250 --mq30 --readType SE --longread --no_dup_removal --no_abra --fastq test_sm.fastq
+./nextflow run nf_wochenende.nf  -with-timeline -with-report -with-dag flowchart.dot --metagenome Ath --aligner minimap2long --remove_mismatching 250 --mq30 --readType SE --longread --no_dup_removal --no_abra --fastq test_sm.fastq
 
 
 # python3 /run_Wochenende.py --ref  --threads 16 --aligner minimap2-long   250 SE  --debug --force_restart test_sm.fastq
