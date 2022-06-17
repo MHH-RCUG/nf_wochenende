@@ -16,10 +16,10 @@
 #SBATCH --job-name=raspir_run
 
 # Add miniconda3 to PATH. TODO - autodetection
-. /mnt/ngsnfs/tools/miniconda3/etc/profile.d/conda.sh
+#. /mnt/ngsnfs/tools/miniconda3/etc/profile.d/conda.sh
 
 # Activate env on cluster node
-conda activate raspir_env >> /dev/null
+#conda activate raspir_env >> /dev/null
 
 for i in `ls *raspir.csv`
 

@@ -17,7 +17,8 @@ v0.0.7
 v0.0.6  
 v0.0.5  
 v0.0.4   
-v0.0.2  
+v0.0.3  sort env variables
+v0.0.2  setup args
 v0.0.1  init
 
 
@@ -31,12 +32,11 @@ def helpMessage() {
     Usage:
     The typical command for running the pipeline is:
       conda activate nextflow
-      nextflow run nf_wochenende.nf  --fasta /path/to/x.fa --fastq /path/x.fastq
-      //nextflow run longread_alignment --genome ZR_S706_v1 -profile conda 
+      nextflow run run_nf_wochenende.nf  --fasta /path/to/x.fa --fastq /path/x.fastq
 
-    Arguments:
+
+    Arguments - all fully defined in script start.sh:
       --fasta [file]                  Path to Fasta reference. (Default: false)
-      --fai [file]                    Path to Fasta.fai reference index used for regions specific SNV calling. (Default: false)
       --fastq.gz [str]                fastq.gz read set
       -profile [str]                  Configuration profile to use. Can use multiple (comma separated)
                                       Available: conda, singularity
@@ -58,32 +58,23 @@ params.save_align_intermeds=true
 params.outdir = "output"
 params.publish_dir_mode = "copy"
 params.fastq = ""
-params.fasta = ""
-params.fai = ""
-params.test = "yes"
-params.min_cov = ""
-params.min_alt_count = ""
-params.min_alt_frac = ""
+params.metagenome = ""
+params.aligner = ""
+params.mismatches = ""
+params.nextera = ""
+params.abra = ""
+params.mapping_quality = ""
+params.readType = ""
+params.debug = ""
+params.longread = ""
+params.no_dup_removal = ""
+params.no_prinseq = ""
+params.no_fastqc = ""
+params.fastp = ""
+params.trim_galore = ""
 
 
-if (params.test.toString().contains("yes")) {
-    println("\nSNP calling defaults set very low for testing only!\n") 
-    params.min_cov = 1
-    params.min_alt_count = 1
-    params.min_alt_frac = 0.25
-}
-else if (params.test.contains("no")) {
-    println("\nSNP calling defaults set to normal for production!\n") 
-    params.min_cov = 10
-    params.min_alt_count = 6
-    params.min_alt_frac = 0.25
-}
-else {
-    print("\nWarning: params.test setting failed !\n")
-}
 
-//script:
-//    params.fai = params.fasta + ".fai"
 
 // Show help message
 if (params.help) {
@@ -98,58 +89,96 @@ if (params.help) {
 
 workflow {
 
-    println "Starting nf_wochenende.nf"
-    println "Version 0.0.1 by Colin Davenport"
+    println "Starting run_nf_wochenende.nf"
+    println "Version 0.0.3 by Colin Davenport"
 
     // File inputs
     input_fastq = Channel.fromPath(params.fastq, checkIfExists: true)
-
+    
     chunksize = Channel.value(1000)
 
 
     // run processes
+   
     
-    //prepare_fai(params.fai)
+    wochenende(input_fastq)
 
-    // Run SNP calling per chromosome (might be easier to split bams, then per bam ?)
-    // Alternative - use per window: bedtools makewindows -g 214815-ZR_S706_v1_chromosomes.fasta.fai -w 10000000 > windows.fai
-    // limits to .take(x) chromosomes for dev only
-    println "\n ###### Warning ! Will only perform SNP calling for these chromosomes: ######"
-    fai_channel = Channel
-        .fromPath(params.fai)
-        .splitText( each:{ it.split().first() } )
-        .take(9)
-        .map { [ it ] }
-        .view()
-    
-    minimap2_align(input_fastq)
-    sort_bam(minimap2_align.out)
+
 
     // generate alignment stats
-    bam_stats(sort_bam.out)
+    //bam_stats(sort_bam.out)
 
     // convert bam to cram format
-    convert_bam_cram(sort_bam.out)
+    //convert_bam_cram(sort_bam.out)
     
-    // longshot, run split by chromosome -from bam
-    longshot(sort_bam.out, fai_channel.flatten())
-    
-    // longshot, run split by chromosome - from cram -smaller, preferred
-    //longshot(convert_bam_cram.out, fai_channel.flatten())
- 
-    // concatenate vcf.gz to bcf. 
-    //concat_bcf(reheader_vcfs.out)
-    concat_bcf(longshot.out.collect())
-
-    // sort bcf results
-    sort_bcf(concat_bcf.out)
-
-    // generate bcf stats
-    stats(sort_bcf.out)
-
     // multiqc
-    multiqc(stats.out.collect(), bam_stats.out)
+    //multiqc(stats.out.collect(), bam_stats.out)
 
+
+}
+
+
+
+
+/*
+ *  Run wochenende
+ *  Parcels the python script into a single Nextflow process
+ */
+
+process wochenende {
+
+    cpus = 16
+	// If job fails, try again with more memory
+	//memory { 40.GB * task.attempt }
+    memory 40.GB
+	errorStrategy 'terminate'
+
+    // TODO - make a singularity container
+    //conda '/home/hpc/davenpor/programs/miniconda3/envs/wochenende/'
+    conda params.conda_wochenende
+
+
+    tag "$name"
+    label 'process_medium'
+    
+       
+    if (params.save_align_intermeds) {
+        publishDir path: "${params.outdir}/minimap2", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith('.bam')) "$filename"
+                          else if (filename.endsWith('.bai')) "$filename"
+                          else if (filename.endsWith('.bam.txt')) "$filename"
+                          else if (filename.endsWith('.fastq')) "$filename"
+                          else filename
+                    }
+    }
+    
+
+
+    input:
+    file fastq
+
+
+    output:
+    file "${prefix}.bam"
+    
+
+    script:
+    prefix = fastq.name.toString().tokenize('.').get(0)
+    name = fastq
+    print params.metagenome
+    print params.WOCHENENDE_DIR
+
+    """
+    export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
+    export HAYBALER_DIR=${params.HAYBALER_DIR}
+
+    cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
+    bash get_wochenende.sh 
+
+    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mapping_quality $params.mismatches --readType $params.readType $params.no_prinseq --debug --force_restart $fastq
+
+    """
 
 }
 
