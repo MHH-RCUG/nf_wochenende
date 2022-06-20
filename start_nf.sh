@@ -1,8 +1,11 @@
 #!/bin/bash
-
+# Start the nf_wochenende pipeline
 
 # get most current version
 git pull -q
+
+# ignore system JAVA_HOME, use that supplied by wochenende conda env for nextflow
+unset JAVA_HOME
 
 # get test
 cp test/data/*.fastq . && bwa index test/data/ref.fa

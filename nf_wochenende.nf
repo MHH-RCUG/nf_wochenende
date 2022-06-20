@@ -16,9 +16,9 @@ v0.0.8
 v0.0.7  
 v0.0.6  
 v0.0.5  
-v0.0.4   
-v0.0.3  sort env variables
-v0.0.2  setup args
+v0.0.4  
+v0.0.3  Organize env variables, remove cluster submission bash code as now handled by nextflow
+v0.0.2  Setup args
 v0.0.1  init
 
 
@@ -90,18 +90,24 @@ if (params.help) {
 workflow {
 
     println "Starting run_nf_wochenende.nf"
-    println "Version 0.0.3 by Colin Davenport"
+    println "Version 0.0.3 by Colin Davenport and Lisa Hollstein with many further contributors"
 
     // File inputs
-    input_fastq = Channel.fromPath(params.fastq, checkIfExists: true)
-    
+    //just R1 linked into dir
+    //input_fastq = Channel.fromPath(params.fastq, checkIfExists: true)
+    // both, but separate workflow dirs
+    //input_fastq = Channel.fromPath("*_R{1,2}.fastq", checkIfExists: true)
+    // Read inputs, SE read inputs should be possible
+    input_fastq_R1 = Channel.fromPath("*_R1.fastq", checkIfExists: true)
+    input_fastq_R2 = Channel.fromPath("*_R2.fastq", checkIfExists: false)
+
     chunksize = Channel.value(1000)
 
 
     // run processes
    
     
-    wochenende(input_fastq)
+    wochenende(input_fastq_R1, input_fastq_R2)
 
 
 
@@ -133,6 +139,7 @@ process wochenende {
     memory 40.GB
 	errorStrategy 'terminate'
 
+    // Use conda env defined in nextflow.config file
     // TODO - make a singularity container
     //conda '/home/hpc/davenpor/programs/miniconda3/envs/wochenende/'
     conda params.conda_wochenende
@@ -157,6 +164,7 @@ process wochenende {
 
     input:
     file fastq
+    file fastq2
 
 
     output:
@@ -164,8 +172,11 @@ process wochenende {
     
 
     script:
-    prefix = fastq.name.toString().tokenize('.').get(0)
+    //prefix = fastq.name.toString().tokenize('.').get(0)
+    prefix = fastq.name.toString().tokenize('_').get(0)
     name = fastq
+    //fastq_R2=prefix + "_R2.fastq"
+    //print "Derived FASTQ R2 from R1 as: " + fastq_R2
     print params.metagenome
     print params.WOCHENENDE_DIR
 
