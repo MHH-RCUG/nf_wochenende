@@ -1,22 +1,11 @@
 --- 
-## Config file for Wochenende and Haybaler
+## Config file for nf_wochenende and Haybaler
 # If you mess up this file, use an online yaml validator to find the problematic lines.
 
 # For paths to program directories - see setup.sh
 
-# use SLURM job scheduler (yes, no). 
-# For direct non-scheduler submission set USE_SLURM to "yes" and SLURM_CUSTOM_PARAMS and SLURM_CUSTOM_PARAMS_SINGLECORE to "" (empty string)
-USE_SLURM: "yes"
-SLURM_CUSTOM_PARAMS: "srun -p normal -c 12"
-SLURM_CUSTOM_PARAMS_SINGLECORE: "srun -p normal -c 1"
-#SLURM_CUSTOM_PARAMS: ""
-#SLURM_CUSTOM_PARAMS_SINGLECORE: ""
-# use a non-SLURM scheduler (yes, no)
-USE_CUSTOM_SCHED: "no"
-CUSTOM_SCHED_CUSTOM_PARAMS: "bsub -q queue -p cores"
-CUSTOM_SCHED_CUSTOM_PARAMS_SINGLECORE: "bsub -q queue -p cores"
-# set number of threads used above eg -c 12 for slurm, then 12 here
-THREADS: 12
+# set number of threads used in your nextflow.config
+#THREADS: 12
 # path to R
 rscript_bin: /usr/bin/Rscript
 # Servers configured for heat tree analysis with the metacoder R package. String with all server hostnames separated by space: "server1 server2 server3 ..."
@@ -32,12 +21,13 @@ adapter_fastp_general: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/adapters
 adapter_fastp_nextera: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/NexteraPE-PE.fa
 adapter_fastp_solid: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/adapters_solid.fa
 adapter_nextera: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/NexteraPE-PE.fa
-adapter_truseq: /mnt/ngsnfs/tools/miniconda3/envs/wochenende/share/trimmomatic-0.39-2/adapters/TruSeq3-PE.fa
+#adapter_truseq: /mnt/ngsnfs/tools/miniconda3/envs/wochenende/share/trimmomatic-0.39-2/adapters/TruSeq3-PE.fa
+adapter_truseq: /home/hpc/davenpor/programs/miniconda3/envs/wochenende/share/trimmomatic-0.39-2/adapters/TruSeq2-PE.fa
 ea_adapter_fasta: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/adapters.fa
 # Paths to tools
-path_abra_jar: /mnt/ngsnfs/tools/abra2/abra2_latest.jar
-path_afterqc: /mnt/ngsnfs/tools/afterQC/AfterQC-0.9.6/after.py
-path_alignerboost: /mnt/ngsnfs/tools/dev/Wochenende/dependencies/AlignerBoost.jar
+#path_abra_jar: /mnt/ngsnfs/tools/abra2/abra2_latest.jar
+#path_afterqc: /mnt/ngsnfs/tools/afterQC/AfterQC-0.9.6/after.py
+#path_alignerboost: /mnt/ngsnfs/tools/dev/Wochenende/dependencies/AlignerBoost.jar
 path_bamtools: bamtools
 path_bwa: bwa
 path_fastp: fastp
@@ -52,7 +42,7 @@ path_perldup: /mnt/ngsnfs/tools/dev/Wochenende/dependencies/remove_pcr_duplicate
 path_prinseq: prinseq-lite.pl
 path_sambamba: sambamba
 path_samtools: samtools
-path_tmpdir: /ngsssd1/rcug/tmp/
+path_tmpdir: temp
 path_trim_galore: trim_galore
 path_trimmomatic: trimmomatic
 # Reference sequences for Wochenende
@@ -102,5 +92,5 @@ path_refseq_dict:
   ssplasmid1: /mnt/ngsnfs/seqres/plasmids/bwa/pX330_NLS1_2-AKCP204LgRneoR_cln.fasta
   ssplasmid2: /mnt/ngsnfs/seqres/plasmids/bwa/SB-U6-gRNA-eCas9-DNLS1_2-EGFP-Neo_cln.fasta
   strept_halo: /mnt/ngsnfs/seqres/metagenref/bwa/strept_halo.fa
-  testdb: testdb/ref.fa
+  testdb: /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/06_20/nf_wochenende-main/test/data/ref.fa
   zf10: /mnt/ngsnfs/seqres/DR/bwa/GRCz10.fa

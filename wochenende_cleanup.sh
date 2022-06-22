@@ -11,6 +11,7 @@ mkdir -p stats
 mkdir -p fastqc
 mkdir -p logs
 
+rm -rf work/
 rm *.tmp
 rm *.trm.fastq
 rm *.trm.bam
@@ -22,6 +23,7 @@ mv *.bam.stats stats
 mv *.bam.txt stats
 mv *_out fastqc
 mv *.out logs
+mv *html* logs
 
 echo "INFO: removing png files from growth_rate"
 # a find exec rm is dangerous though, so go more targeted
@@ -32,6 +34,6 @@ cd $base_dir
 
 echo "INFO: gzipping fastq with pigz"
 #assumes SLURM present, else remove all before pigz
-srun -c 56 pigz -p 56 *.fastq &
+#srun -c 56 pigz -p 56 *.fastq &
 
 

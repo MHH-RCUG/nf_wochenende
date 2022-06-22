@@ -8,6 +8,7 @@ Author: Fabian Friedrich
 Author: Sophia Poertner
 
 Changelog
+2.0.1 remove abra after security concerns with log4j
 2.0.0 allow configurable job scheduler in config.yaml
 1.9.9 calculate bam.bai in paired end mode for all outputs
 1.9.8 yaml config parsing from BASH environment variable defined location (need to configure and run setup.sh before starting)
@@ -1498,15 +1499,16 @@ def main(args, sys_argv):
             currentFile = runFunc("runBAMindex10", runBAMindex, currentFile, False)
             currentFile = runFunc("runIDXstats10", runIDXstats, currentFile, False)
 
-        if not args.no_abra and not args.longread:
-            currentFile = runFunc(
-                "abra",
-                abra,
-                currentFile,
-                True,
-                path_refseq_dict.get(args.metagenome),
-                threads,
-            )
+        # Abra commented out amid security concerns log4j
+        #if not args.no_abra and not args.longread:
+        #    currentFile = runFunc(
+        #        "abra",
+        #        abra,
+        #        currentFile,
+        #        True,
+        #        path_refseq_dict.get(args.metagenome),
+        #        threads,
+        #    )
         currentFile = runFunc(
             "calmd", calmd, currentFile, True, path_refseq_dict.get(args.metagenome)
         )
@@ -1617,16 +1619,17 @@ def main(args, sys_argv):
             currentFile = runFunc("runBAMindex7", runBAMindex, currentFile, False)
 
         currentFile = runFunc("runIDXstats2", runIDXstats, currentFile, False)
-
-        if not args.no_abra:
-            currentFile = runFunc(
-                "abra",
-                abra,
-                currentFile,
-                True,
-                path_refseq_dict.get(args.metagenome),
-                threads,
-            )
+        
+        # abra commented out for security
+        #if not args.no_abra:
+        #    currentFile = runFunc(
+        #        "abra",
+        #        abra,
+        #        currentFile,
+        #        True,
+        #        path_refseq_dict.get(args.metagenome),
+        #        threads,
+        #    )
         currentFile = runFunc("runBAMindex8", runBAMindex, currentFile, False)
         currentFile = runFunc(
             "calmd", calmd, currentFile, True, path_refseq_dict.get(args.metagenome)

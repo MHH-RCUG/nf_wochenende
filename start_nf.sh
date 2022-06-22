@@ -1,11 +1,19 @@
 #!/bin/bash
-
+# Start the nf_wochenende pipeline
 
 # get most current version
 git pull -q
 
+# ignore system JAVA_HOME, use that supplied by wochenende conda env for nextflow
+unset JAVA_HOME
+
+# get test
+cp test/data/*.fastq . && bwa index test/data/ref.fa
+
 # run pipeline, no bash variables allowed as empty strings evaluate to true in groovy
-./nextflow run nf_wochenende.nf  -with-timeline -with-report -with-dag flowchart.dot --metagenome Ath --aligner minimap2long --remove_mismatching 250 --mq30 --readType SE --longread --no_dup_removal --no_abra --fastq test_sm.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report -with-dag flowchart.dot --metagenome Ath --aligner minimap2long --remove_mismatching 250 --mq30 --readType SE --longread --no_dup_removal --no_abra --fastq test_sm.fastq
+# run test
+nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --remove_mismatching 2 --mq30 --readType PE  --no_dup_removal --no_abra --fastq *R1.fastq
 
 
 # python3 /run_Wochenende.py --ref  --threads 16 --aligner minimap2-long   250 SE  --debug --force_restart test_sm.fastq
