@@ -168,7 +168,7 @@ process wochenende {
 
 
     output:
-    file "${prefix}.bam"
+    file "${prefix}*.bam"
     
 
     script:
