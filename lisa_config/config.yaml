@@ -11,19 +11,19 @@ rscript_bin: /usr/bin/Rscript
 # Servers configured for heat tree analysis with the metacoder R package. String with all server hostnames separated by space: "server1 server2 server3 ..."
 heattree_server: "hpc-bc15-07 hpc-bc15-12 hpc06 hpc-rc11"
 # Path to conda.sh file. eg. /mnt/ngsnfs/tools/miniconda3/etc/profile.d/conda.sh
-CONDA_SH_PATH: /mnt/ngsnfs/tools/miniconda3/etc/profile.d/conda.sh
+CONDA_SH_PATH: /home/rcug_lw/tools/miniconda3/etc/profile.d/conda.sh
 WOCHENENDE_CONDA_ENV_NAME: wochenende
 HAYBALER_CONDA_ENV_NAME: haybaler
 # Activate multiqc
 USE_MULTIQC: "no"
 # Adapter sequence locations
-adapter_fastp_general: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/adapters.fa
-adapter_fastp_nextera: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/NexteraPE-PE.fa
-adapter_fastp_solid: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/adapters_solid.fa
-adapter_nextera: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/NexteraPE-PE.fa
+adapter_fastp_general: /mnt/ngsnfs/seqres/metagenref/bwa/Wochenende_reference/adapters/adapters.fa
+adapter_fastp_nextera: /mnt/ngsnfs/seqres/metagenref/bwa/Wochenende_reference/adapters/NexteraPE-PE.fa
+adapter_fastp_solid: /mnt/ngsnfs/seqres/metagenref/bwa/Wochenende_reference/adapters/adapters_solid.fa
+adapter_nextera: /mnt/ngsnfs/seqres/metagenref/bwa/Wochenende_reference/adapters/NexteraPE-PE.fa
 #adapter_truseq: /mnt/ngsnfs/tools/miniconda3/envs/wochenende/share/trimmomatic-0.39-2/adapters/TruSeq3-PE.fa
 adapter_truseq: /home/rcug_lw/miniconda3/envs/wochenende/share/trimmomatic-0.39-2/adapters/TruSeq2-PE.fa
-ea_adapter_fasta: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/adapters.fa
+ea_adapter_fasta: /mnt/ngsnfs/seqres/metagenref/bwa/Wochenende_reference/adapters/adapters.fa
 # Paths to tools
 #path_abra_jar: /mnt/ngsnfs/tools/abra2/abra2_latest.jar
 #path_afterqc: /mnt/ngsnfs/tools/afterQC/AfterQC-0.9.6/after.py
@@ -38,7 +38,7 @@ path_java: java
 path_minimap2: minimap2
 path_ngmlr: ngmlr
 path_perl: perl
-path_perldup: /mnt/ngsnfs/tools/dev/Wochenende/dependencies/remove_pcr_duplicates.pl
+path_perldup: /mnt/ngsnfs/rcug_lw/lisa/nf_wochenende/dependencies/remove_pcr_duplicates.pl
 path_prinseq: prinseq-lite.pl
 path_sambamba: sambamba
 path_samtools: samtools
@@ -92,5 +92,5 @@ path_refseq_dict:
   ssplasmid1: /mnt/ngsnfs/seqres/plasmids/bwa/pX330_NLS1_2-AKCP204LgRneoR_cln.fasta
   ssplasmid2: /mnt/ngsnfs/seqres/plasmids/bwa/SB-U6-gRNA-eCas9-DNLS1_2-EGFP-Neo_cln.fasta
   strept_halo: /mnt/ngsnfs/seqres/metagenref/bwa/strept_halo.fa
-  testdb: /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/06_20/nf_wochenende-main/test/data/ref.fa
+  testdb: /mnt/ngsnfs/rcug_lw/lisa/nf_wochenende/test/data/ref.fa
   zf10: /mnt/ngsnfs/seqres/DR/bwa/GRCz10.fa
