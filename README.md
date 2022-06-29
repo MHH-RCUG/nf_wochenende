@@ -12,12 +12,22 @@ Work in progress (Spring-Summer 2022).
 
 
 Running nf_wochenende
+* You **do not** need to edit and run setup.sh any more, this will be removed
 * Edit config in `config.yaml`
-* Edit config in `nextflow.config`  (scheduler, etc)
-* Get a small read fastq file as input
+* Edit config in `nextflow.config`  (scheduler, path to Wochenende, etc)
+* Get a small read fastq file as input (present in the repo for testing)
 * Edit `start_nf.sh`
 * Run `bash start_nf.sh`
 
+Output
+* By default in output/wochenende
+
+If missing or 0 sized bams in output
+* Check most recent work folder
+* cd work && ls -lrt
+* Go into most recent folder and subfolder
+* ls -l 
+* cat .command.err
 
 
 Not touched to date

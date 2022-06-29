@@ -92,5 +92,5 @@ path_refseq_dict:
   ssplasmid1: /mnt/ngsnfs/seqres/plasmids/bwa/pX330_NLS1_2-AKCP204LgRneoR_cln.fasta
   ssplasmid2: /mnt/ngsnfs/seqres/plasmids/bwa/SB-U6-gRNA-eCas9-DNLS1_2-EGFP-Neo_cln.fasta
   strept_halo: /mnt/ngsnfs/seqres/metagenref/bwa/strept_halo.fa
-  testdb: /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/06_20/nf_wochenende-main/test/data/ref.fa
+  testdb: /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/current/nf_wochenende/test/data/ref.fa
   zf10: /mnt/ngsnfs/seqres/DR/bwa/GRCz10.fa
