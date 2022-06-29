@@ -180,14 +180,22 @@ process wochenende {
     print params.metagenome
     print params.WOCHENENDE_DIR
 
+    if (params.mapping_quality != "") {
+       params.mq = "--" + params.mapping_quality
+       print params.mq
+    } else {
+       params.mq = ""
+    }
+
     """
     export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
     export HAYBALER_DIR=${params.HAYBALER_DIR}
 
     cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
-    bash get_wochenende.sh 
+    bash get_wochenende.sh
+        
 
-    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mapping_quality $params.mismatches --readType $params.readType $params.no_prinseq --debug --force_restart $fastq
+    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.no_prinseq --debug --force_restart $fastq
 
     """
 
