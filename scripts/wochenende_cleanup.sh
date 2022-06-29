@@ -1,3 +1,5 @@
+#!/bin/bash
+
 mkdir stats
 mkdir fastqc
 
@@ -10,5 +12,5 @@ rm *.trm.s.bam.bai
 mv *.bam.stats stats
 mv *.bam.txt stats
 mv *_out fastqc
-srun -c 56 pigz -p 56 *.fastq &
+#srun -c 56 pigz -p 56 *.fastq &
 
