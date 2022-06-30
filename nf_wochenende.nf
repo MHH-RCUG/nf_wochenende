@@ -110,7 +110,7 @@ workflow {
     wochenende(input_fastq_R1, input_fastq_R2)
 
     // run plots on the calmd_bams only
-    plots(wochenende.out.calmd_bams)
+    plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
     // generate alignment stats
     //bam_stats(wochenende.out)
@@ -178,6 +178,11 @@ process wochenende {
     path "*.calmd.bam", emit: calmd_bams
     path "*.mm.bam", emit: mm_bams
     path "*.dup.bam", emit: dup_bams
+    path "*.bam.bai", emit: bam_bais
+    path "*.s.bam.bai", emit: s_bam_bais
+    path "*.calmd.bam.bai", emit: calmd_bam_bais
+    path "*.mm.bam.bai", emit: mm_bam_bais
+    path "*.dup.bam.bai", emit: dup_bam_bais
     path "*.bai"
     path "*.fastq"
     path "*.bam.txt"
@@ -239,7 +244,7 @@ process plots {
 
     input:
     file bam
-    //file bai
+    file bai
     //file fastq
     //file bam_txt
 
@@ -260,13 +265,11 @@ process plots {
     bash get_wochenende.sh 
 
     cp scripts/*.sh .
-    bash runbatch_sambamba_depth.sh >>/dev/null 2>&1
+    bash runbatch_sambamba_depth.sh
     
     echo "INFO: Completed Sambamba depth and filtering"
 
     echo "INFO: Started Wochenende plot"
-    cd $launchDir
-
     cd plots
     cp ../*_window.txt . 
     cp ../*_window.txt.filt.csv .
