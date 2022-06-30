@@ -15,7 +15,11 @@ cp test/data/*.fastq . && bwa index test/data/ref.fa
 ############
 # run test
 ###########
-nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --remove_mismatching 2 --mq30 --readType PE  --no_dup_removal --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --remove_mismatching 2 --mq30 --readType PE  --no_dup_removal --no_abra --fastq *R1.fastq
+
+# lisa version with corrected args
+nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE  --no_dup_removal --no_abra --fastq *R1.fastq
+
 
 
 
@@ -29,7 +33,6 @@ nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb -
 
 # run pipeline, no bash variables allowed as empty strings evaluate to true in groovy
 #nextflow run nf_wochenende.nf  -with-timeline -with-report -with-dag flowchart.dot --metagenome Ath --aligner minimap2long --remove_mismatching 250 --mq30 --readType SE --longread --no_dup_removal --no_abra --fastq test_sm.fastq
-
 
 # python3 /run_Wochenende.py --ref  --threads 16 --aligner minimap2-long   250 SE  --debug --force_restart test_sm.fastq
 
