@@ -1,0 +1,6 @@
+.nextflow/
+output/*
+work/*
+*html*
+*log*
+ref.fa.*
