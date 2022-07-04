@@ -62,13 +62,13 @@ params.metagenome = ""
 params.aligner = ""
 params.mismatches = ""
 params.nextera = ""
-params.abra = ""
+// params.abra = ""
 params.mapping_quality = ""
 params.readType = ""
 params.debug = ""
 params.longread = ""
-params.no_dup_removal = ""
-params.no_prinseq = ""
+// params.no_dup_removal = ""
+// params.no_prinseq = ""
 params.no_fastqc = ""
 params.fastp = ""
 params.trim_galore = ""
@@ -110,7 +110,7 @@ workflow {
     wochenende(input_fastq_R1, input_fastq_R2)
 
     // run plots on the calmd_bams only
-    plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    // plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
     // generate alignment stats
     //bam_stats(wochenende.out)
@@ -199,20 +199,37 @@ process wochenende {
 
     if (params.mapping_quality != "") {
        params.mq = "--" + params.mapping_quality
-       print params.mq
     } else {
        params.mq = ""
     }
+
+    if (params.no_abra) {
+       params.abra = "--no_abra"
+    } else {
+       params.abra = ""
+    }
+
+    if (params.no_dup_removal) {
+       params.no_duplicate_removal = "--no_duplicate_removal"
+    } else {
+       params.no_duplicate_removal = ""
+    } 
+
+    if (params.no_prinseq) {
+       params.prinseq = "--no_prinseq"
+    } else {
+       params.prinseq = ""
+    }
+
 
     """
     export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
     export HAYBALER_DIR=${params.HAYBALER_DIR}
 
     cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
-    bash get_wochenende.sh
-        
+    bash get_wochenende.sh        
 
-    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.no_prinseq --debug --force_restart $fastq
+    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --debug --force_restart $fastq
 
     """
 
