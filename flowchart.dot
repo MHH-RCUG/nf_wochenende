@@ -1,0 +1,10 @@
+digraph "flowchart" {
+p0 [shape=point,label="",fixedsize=true,width=0.1,xlabel="Channel.fromPath"];
+p1 [label="wochenende"];
+p0 -> p1 [label="input_fastq"];
+
+p1 [label="wochenende"];
+p2 [shape=point];
+p1 -> p2;
+
+}
