@@ -66,7 +66,7 @@ echo "INFO:  Filtering and sorting  Wochenende output bam.txt files"
 for i in `find . -name "*.bam.txt"`
         do
 		# Run directly, else can adversely impact slurmdbd database.
-		#$scheduler awk -F "\t" '$3>=20' $i | sort -t$'\t' -k3 -nr > $i.filt.sort.csv &
+		#awk -F "\t" '$3>=20' $i | sort -t$'\t' -k3 -nr > $i.filt.sort.csv &
 		awk -F "\t" '$3>=20' $i | sort -t$'\t' -k3 -nr > $i.filt.sort.csv &
 done
 wait

@@ -3,10 +3,6 @@
 # Check window coverage on Wochenende sorted dup.bam output
 # Use output for Python script to check coverage distribution
 
-# Setup SLURM using data parsed from config.yaml
-source $WOCHENENDE_DIR/scripts/parse_yaml.sh
-eval $(parse_yaml $WOCHENENDE_DIR/config.yaml)
-
 
 # Actually run for each BAM file
 for i in `ls *calmd.bam`; do
@@ -20,8 +16,8 @@ for i in `ls *calmd.bam`; do
 	
 	# Get coverage depth in windows
 	# x threads, Windows 100000, overlap 50000, -c minimum coverage. 
-	# SLURM
-	$scheduler $path_sambamba depth window -t $THREADS --max-coverage=$covMax --window-size=$window --overlap $overlap -c 0.00001 ${sec_input}.bam > ${sec_input}_cov_window.txt &
+	#$path_sambamba depth window -t 8 --max-coverage=$covMax --window-size=$window --overlap $overlap -c 0.00001 ${sec_input}.bam > ${sec_input}_cov_window.txt &
+	sambamba depth window -t 8 --max-coverage=$covMax --window-size=$window --overlap $overlap -c 0.00001 ${sec_input}.bam > ${sec_input}_cov_window.txt &
 
 done
 wait

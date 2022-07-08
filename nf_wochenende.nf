@@ -62,13 +62,13 @@ params.metagenome = ""
 params.aligner = ""
 params.mismatches = ""
 params.nextera = ""
-params.abra = ""
+// params.abra = ""
 params.mapping_quality = ""
 params.readType = ""
 params.debug = ""
 params.longread = ""
-params.no_dup_removal = ""
-params.no_prinseq = ""
+// params.no_dup_removal = ""
+// params.no_prinseq = ""
 params.no_fastqc = ""
 params.fastp = ""
 params.trim_galore = ""
@@ -109,16 +109,17 @@ workflow {
     
     wochenende(input_fastq_R1, input_fastq_R2)
 
-
+    // run plots on the calmd_bams only
+    // plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
     // generate alignment stats
-    //bam_stats(sort_bam.out)
+    //bam_stats(wochenende.out)
 
     // convert bam to cram format
     //convert_bam_cram(sort_bam.out)
     
     // multiqc
-    //multiqc(stats.out.collect(), bam_stats.out)
+    //multiqc(bam_stats.out.collect(), bam_stats.out)
 
 
 }
@@ -129,6 +130,7 @@ workflow {
 /*
  *  Run wochenende
  *  Parcels the python script into a single Nextflow process
+ *  Output - sorted bams for each step, and bam.txt files with read counts per chromosome.
  */
 
 process wochenende {
@@ -150,11 +152,12 @@ process wochenende {
     
        
     if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/minimap2", mode: params.publish_dir_mode,
+        publishDir path: "${params.outdir}/wochenende", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith('.bam')) "$filename"
                           else if (filename.endsWith('.bai')) "$filename"
                           else if (filename.endsWith('.bam.txt')) "$filename"
+                          else if (filename.endsWith('.txt')) "$filename"
                           else if (filename.endsWith('.fastq')) "$filename"
                           else filename
                     }
@@ -168,7 +171,21 @@ process wochenende {
 
 
     output:
-    file "${prefix}*.bam"
+    //file "${prefix}*s.bam"
+    //file "${prefix}*s.bam.bai"
+    path "*.bam", emit: bams
+    path "*.s.bam", emit: s_bams
+    path "*.calmd.bam", emit: calmd_bams
+    path "*.mm.bam", emit: mm_bams
+    path "*.dup.bam", emit: dup_bams
+    path "*.bam.bai", emit: bam_bais
+    path "*.s.bam.bai", emit: s_bam_bais
+    path "*.calmd.bam.bai", emit: calmd_bam_bais
+    path "*.mm.bam.bai", emit: mm_bam_bais
+    path "*.dup.bam.bai", emit: dup_bam_bais
+    path "*.bai"
+    path "*.fastq"
+    path "*.bam.txt"
     
 
     script:
@@ -180,14 +197,39 @@ process wochenende {
     print params.metagenome
     print params.WOCHENENDE_DIR
 
+    if (params.mapping_quality != "") {
+       params.mq = "--" + params.mapping_quality
+    } else {
+       params.mq = ""
+    }
+
+    if (params.no_abra) {
+       params.abra = "--no_abra"
+    } else {
+       params.abra = ""
+    }
+
+    if (params.no_dup_removal) {
+       params.no_duplicate_removal = "--no_duplicate_removal"
+    } else {
+       params.no_duplicate_removal = ""
+    } 
+
+    if (params.no_prinseq) {
+       params.prinseq = "--no_prinseq"
+    } else {
+       params.prinseq = ""
+    }
+
+
     """
     export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
     export HAYBALER_DIR=${params.HAYBALER_DIR}
 
     cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
-    bash get_wochenende.sh 
+    bash get_wochenende.sh        
 
-    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mapping_quality $params.mismatches --readType $params.readType $params.no_prinseq --debug --force_restart $fastq
+    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --debug --force_restart $fastq
 
     """
 
@@ -197,36 +239,39 @@ process wochenende {
 
 
 /*
- *  Run minimap2
+ *  Run plots
  */
 
-process minimap2_align {
+process plots {
 
-    cpus = 16
+    cpus = 2
 	// If job fails, try again with more memory
-	memory { 32.GB * task.attempt }
-	errorStrategy 'retry'
+	memory { 8.GB * task.attempt }
+	errorStrategy 'terminate'
+    //errorStrategy 'retry'
 
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/wochenende/'
-
+    // Use conda env defined in nextflow.config file
+    conda params.conda_wochenende
 
     tag "$name"
     label 'process_medium'
     
-    // Do not save sam files to output folder by default
-    /*
-    *if (params.save_align_intermeds) {
-    *    publishDir path: "${params.outdir}/minimap2", mode: params.publish_dir_mode,
-    *        saveAs: { filename ->
-    *                      if (filename.endsWith('.flagstat')) "$filename"
-    *                      else filename
-    *                }
-    *}
-    */
+       
+    if (params.save_align_intermeds) {
+        publishDir path: "${params.outdir}/plots", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith('images')) "$filename"
+                          else filename
+                    }
+    }
+    
 
 
     input:
-    file fastq
+    file bam
+    file bai
+    //file fastq
+    //file bam_txt
 
 
     output:
@@ -234,11 +279,30 @@ process minimap2_align {
     
 
     script:
-    prefix = fastq.name.toString().tokenize('.').get(0)
-    name = fastq
+    prefix = bam.name.toString().tokenize('.').get(0)
+    name = bam
 
     """
-    minimap2 -x map-ont -a --split-prefix ${prefix} -t $task.cpus  -o ${prefix}.sam $params.fasta $fastq
+    export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
+    export HAYBALER_DIR=${params.HAYBALER_DIR}
+
+    cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
+    bash get_wochenende.sh 
+
+    cp scripts/*.sh .
+    bash runbatch_sambamba_depth.sh
+    
+    echo "INFO: Completed Sambamba depth and filtering"
+
+    echo "INFO: Started Wochenende plot"
+    cd plots
+    cp ../*_window.txt . 
+    cp ../*_window.txt.filt.csv .
+    bash runbatch_wochenende_plot.sh >/dev/null 2>&1
+    cd $launchDir
+    echo "INFO: Completed Wochenende plot"
+
+
     """
 }
 
@@ -325,6 +389,10 @@ process bam_stats {
 
     input:
     file bam
+    file bai
+    file fastq
+    file bam_txt
+
 
 
     output:
@@ -396,231 +464,6 @@ process convert_bam_cram {
 
 
 
-/*
- *  Call SNVs from long read BAM
- *  TODO - parallelize by chr, then recombine?
- */
-
-process longshot {
-    //echo true
-    cpus = 2
-	// If job fails, try again with more memory
-	memory { 16.GB * task.attempt }
-	errorStrategy 'retry'
-
-    // TODO - singularity 
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
-    
-    tag "$name + $region"
-    label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/longshot", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith('.vcf.gz')) "$filename"
-                          else if (filename.endsWith('.tbi')) "$filename"
-                          else filename
-                    }
-    }
-
-
-    input:
-    file sorted_bam
-    file bai
-    each region
-  
-    output:
-    //file vcf_gz
-    file vcf_reheader_gz
-
-    script:
-    prefix = sorted_bam.toString().tokenize('.').get(0)
-    name = sorted_bam
-    vcf =  prefix + "_" + region + ".vcf"
-    vcf_gz = vcf + ".gz"
-    vcf_reheader_gz = vcf + "_reheader.gz"
-    //print(params.fai)
-    
-    """
-    longshot --region ${ region } --bam $sorted_bam --ref $params.fasta  --min_cov $params.min_cov --min_alt_count $params.min_alt_count --min_alt_frac $params.min_alt_frac --sample_id ${prefix} --out ${vcf} > ${prefix}${region + "_out.txt"} 2> ${prefix}${region + "_err.txt"}
-    
-    bgzip -f -k -@ $task.cpus ${vcf}
-    tabix ${vcf + ".gz"}
-    
-    bcftools reheader -f ${params.fai} -o $vcf_reheader_gz   ${vcf + ".gz"}
-
-    
-    """    
-
-    //longshot --region ${ region } --bam $sorted_bam --ref $params.fasta --out ${prefix + "_"}${region}.vcf --min_cov $params.min_cov --min_alt_count $params.min_alt_count --min_alt_frac $params.min_alt_frac --sample_id ${prefix} > ${prefix}${region + "_out.txt"} 2> ${prefix}${region + "_err.txt"}
-
-    // forward, reverse, merge agreement as D. Eccles and Janinas suggestion?
-    // or set strand_bias_pvalue_cutoff higher ?
-    // longshot --anchor_length <int> --band_width <Band width> --density_params <string> --hap_converge_delta <float> --hap_assignment_qual <float> --het_snv_rate <float> --hom_snv_rate <float> --bam <BAM> --ref <FASTA> --max_cigar_indel <int> --max_cov <int> --max_window <int> --min_allele_qual <float> --min_cov <int> --min_mapq <int> --out <VCF> --potential_snv_cutoff <float> --min_alt_count <int> --min_alt_frac <float> --sample_id <string> --strand_bias_pvalue_cutoff <float> --max_snvs <int> --ts_tv_ratio <float>
-    // longshot defaults are permissive, suggest more restrictive as with short read pipeline! eg 10, 6, 0.3 respectively ?
-    // --min_cov = 6
-    // -e, --min_alt_count <int>                  Require a potential SNV to have at least this many alternate allele observations. [default: 3]
-    // -E, --min_alt_frac <float>                 Require a potential SNV to have at least this fraction of alternate allele observations. [default: 0.125]
-    
-
-
-}
-
-
-
-/*
- *  Combine VCFs, reheader, create bcf from long read BAM
- */
-
-process concat_bcf {
-
-    cpus = 8
-	// If job fails, try again with more memory
-	memory { 16.GB * task.attempt }
-	errorStrategy 'retry'
-
-    // TODO - singularity 
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
-    
-    tag "$name"
-    label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/bcftools", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith('.bcfxxxx')) "$filename"
-                          else filename
-                    }
-    }
-
-    input:
-    file vcflist
-    
-    
-    output:
-    file bcf
-    file bcfindex
-
-    script:
-    //prefix = vcflist[0].toString().tokenize('.').get(0)
-    name = "concatenate"
-    first_vcf = vcflist[0]
-    bcf = "concatenated.bcf"
-    bcfindex = "concatenated.bcf.csi"
-    sort_dir = "sort_tmp"
-
-    """
-    bcftools concat --threads $task.cpus -Ov -o concatenated.vcf.gz  ${vcflist}
-    tabix concatenated.vcf.gz
-
-    bcftools reheader -f ${params.fai} -o concatenated2.vcf.gz concatenated.vcf.gz
-    tabix concatenated2.vcf.gz
-
-    bcftools view -Ob -o concatenated.bcf concatenated2.vcf.gz
-    bcftools index concatenated.bcf
-    
-    """
-
-
-}
-
-
-
-
-/*
- *  Sort bcf
- */
-
-process sort_bcf {
-
-    cpus = 2
-	// If job fails, try again with more memory
-	memory { 16.GB * task.attempt }
-	errorStrategy 'retry'
-
-    // TODO - singularity 
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
-    
-    tag "$name"
-    label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/bcftools", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith('.s.bcf')) "$filename"
-                          else if (filename.endsWith('.s.csi')) "$filename"
-                          else filename
-                    }
-    }
-
-    input:
-    file bcf
-    file bcf_index
-    
-    
-    output:
-    file bcf_s
-    file bcf_s_index
-
-    script:
-    prefix = params.fastq.toString().tokenize('.').get(0)
-    name = prefix
-    bcf_s = prefix + ".s.bcf"
-    bcf_s_index = prefix + ".s.bcf.csi"
-    sort_dir = "sort_tmp"
-
-    """
-
-    mkdir -p ${sort_dir}
-    bcftools sort --temp-dir ${sort_dir} -Ob -o ${prefix + ".s.bcf"} concatenated.bcf
-    bcftools index ${prefix + ".s.bcf"}
-    """
-
-
-
-}
-
-
-
-/*
- *  Generate stats
- */
-
-process stats {
-    cpus = 8
-	// If job fails, try again with more memory
-	memory { 4.GB * task.attempt }
-	errorStrategy 'retry'
-
-    // TODO - singularity 
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
-    
-    tag "$name"
-    label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/bcftools", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith('.txt')) "$filename"
-                          else filename
-                    }
-    }
-    input:
-    file bcf
-    file bcf_index
-    
-    output:
-    path("*.txt")
-
-
-    script:
-    prefix = bcf.toString().tokenize('.').get(0)
-    name = prefix
-
-
-    """
-    vt peek $bcf > ${prefix + "vtpeek.txt"}
-    bcftools stats --threads $task.cpus $bcf > ${prefix + "bcftools_stats.txt"}
-
-    """
-    
-}
 
 
 /*
