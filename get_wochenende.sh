@@ -3,8 +3,8 @@
 # A helper script to copy Wochenende scripts/directory to the current path.
 # Uses settings from the config yaml file
 
-echo "INFO: setup.sh should have created  WOCHENENDE_DIR environment variable on this server and user account"
-echo "INFO: WOCHENENDE_DIR detected as: " $WOCHENENDE_DIR
+#echo "INFO: setup.sh should have created  WOCHENENDE_DIR environment variable on this server and user account"
+#echo "INFO: WOCHENENDE_DIR detected as: " $WOCHENENDE_DIR
 
 # check if env variables are correctly defined.
 if [[ -z "${WOCHENENDE_DIR}" || -z "${HAYBALER_DIR}" ]]; then
