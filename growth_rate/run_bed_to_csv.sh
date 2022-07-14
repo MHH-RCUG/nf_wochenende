@@ -9,9 +9,10 @@
 
 # Bugs: if you experience problems, try deleting the growth_rate folder and running get_wochenende.sh again.
 
-echo "Version 0.18 of run_bed_to_csv.sh"
+echo "Version 0.19 of run_bed_to_csv.sh"
 
 # Changelog
+# 0.19 - adaptation for nf_wochenende version
 # 0.18 - improve environment handling, concurrent job submission bugfix
 # 0.17 - remove previous results if present to avoid problems
 # 0.16 - unlink files at start if present already to avoid errors
@@ -22,20 +23,21 @@ echo "Version 0.18 of run_bed_to_csv.sh"
 # 0.11 - link in bam, bam.txt and bai files, unlink later
 # 0.10 - remove bedtools binary and use conda bedtools
 
+## Now use nextflow.config, so this part is not needed
 # Setup conda and directories using data parsed from config.yaml
-source $WOCHENENDE_DIR/scripts/parse_yaml.sh
-eval $(parse_yaml $WOCHENENDE_DIR/config.yaml)
-haybaler_dir=$HAYBALER_DIR
-wochenende_dir=$WOCHENENDE_DIR
+#source $WOCHENENDE_DIR/scripts/parse_yaml.sh
+#eval $(parse_yaml $WOCHENENDE_DIR/config.yaml)
+#haybaler_dir=$HAYBALER_DIR
+#wochenende_dir=$WOCHENENDE_DIR
 # Set and activate existing conda env
 #. $CONDA_SH_PATH
 #conda activate $WOCHENENDE_CONDA_ENV_NAME
 
 # check if env variables could be defined.
-if [[ -z "${WOCHENENDE_DIR}" || -z "${HAYBALER_DIR}" ]]; then
-    echo "ERROR: WOCHENENDE_DIR or HAYBALER_DIR was not found. Use setup.sh in the Wochenende project to set the directory properly. Exiting! "
-    exit 1
-fi
+#if [[ -z "${WOCHENENDE_DIR}" || -z "${HAYBALER_DIR}" ]]; then
+#    echo "ERROR: WOCHENENDE_DIR or HAYBALER_DIR was not found. Use setup.sh in the Wochenende project to set the directory properly. Exiting! "
+#    exit 1
+#fi
 
 
 bam=${1/..\//}

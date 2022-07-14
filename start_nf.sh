@@ -1,5 +1,6 @@
 #!/bin/bash
-# Start the nf_wochenende pipeline
+echo "bash script to start the nf_wochenende pipeline"
+echo "Requires nextflow and bwa in path. Maybe do this first: conda activate wochenende"
 
 # get most current version
 git pull -q
@@ -18,8 +19,13 @@ cp test/data/*.fastq . && bwa index test/data/ref.fa
 #nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --remove_mismatching 2 --mq30 --readType PE  --no_dup_removal --no_abra --fastq *R1.fastq
 
 # lisa version with corrected args
-nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE  --no_prinseq --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE  --no_prinseq --no_abra --fastq *R1.fastq
 
+# with dup removal
+nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE --no_abra --fastq *R1.fastq
+
+# Single ended reads
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_dup_removal --no_abra --fastq *R1.fastq
 
 
 

@@ -2,8 +2,8 @@
 # Growth rate module.
 
 # Setup SLURM using data parsed from config.yaml
-source $WOCHENENDE_DIR/scripts/parse_yaml.sh
-eval $(parse_yaml $WOCHENENDE_DIR/config.yaml)
+#source $WOCHENENDE_DIR/scripts/parse_yaml.sh
+#eval $(parse_yaml $WOCHENENDE_DIR/config.yaml)
 
 
 # check if input bams exist
