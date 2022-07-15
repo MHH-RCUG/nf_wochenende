@@ -16,7 +16,7 @@ v0.0.8
 v0.0.7  
 v0.0.6  
 v0.0.5  
-v0.0.4  
+v0.0.4  First plot semi-working, start growth rate, test with bigger data
 v0.0.3  Organize env variables, remove cluster submission bash code as now handled by nextflow
 v0.0.2  Setup args
 v0.0.1  init
@@ -90,7 +90,7 @@ if (params.help) {
 workflow {
 
     println "Starting run_nf_wochenende.nf"
-    println "Version 0.0.3 by Colin Davenport and Lisa Hollstein with many further contributors"
+    println "Version 0.0.4 by Colin Davenport and Lisa Hollstein with many further contributors"
 
     // File inputs
     //just R1 linked into dir
@@ -109,8 +109,14 @@ workflow {
     
     wochenende(input_fastq_R1, input_fastq_R2)
 
+    // run reporting
+    reporting(wochenende.out.bam_txts.flatten())
+
     // run plots on the calmd_bams only
     // plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+
+    // run growth_rate prediction software
+    // growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
 
     // generate alignment stats
     //bam_stats(wochenende.out)
@@ -120,6 +126,9 @@ workflow {
     
     // multiqc
     //multiqc(bam_stats.out.collect(), bam_stats.out)
+
+    // metagen window filter
+    // metagen_window(wochenende.out.all, plots.out.window_txt)
 
 
 }
@@ -185,7 +194,9 @@ process wochenende {
     path "*.dup.bam.bai", emit: dup_bam_bais
     path "*.bai"
     path "*.fastq"
-    path "*.bam.txt"
+    path "*.bam.txt", emit: bam_txts
+    path "*", emit: all
+    //path "ref.tmp", emit: ref_tmp
     
 
     script:
@@ -229,6 +240,7 @@ process wochenende {
     cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
     bash get_wochenende.sh        
 
+
     python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --debug --force_restart $fastq
 
     """
@@ -236,6 +248,35 @@ process wochenende {
 }
 
 
+/*
+ * Run reporting
+ */
+
+process reporting {
+    cpus = 2
+
+    conda params.conda_wochenende
+
+    publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
+
+    input:
+    file bamtxt
+
+    output:
+    path "*csv", emit: csvs
+    path "*.rep.us.csv", emit: us_csvs
+    path "*.rep.s.csv", emit: s_csvs
+
+    script:
+
+    """
+    export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
+
+    cp ${params.WOCHENENDE_DIR}/reporting/basic_reporting.py .
+
+    python3 basic_reporting.py --input_file $bamtxt --reference /mnt/ngsnfs/seqres/metagenref/bwa/2021_12_human_bact_arch_fungi_vir.fa --sequencer illumina --output_name $bamtxt
+    """
+}
 
 
 /*
@@ -247,7 +288,8 @@ process plots {
     cpus = 2
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -275,7 +317,8 @@ process plots {
 
 
     output:
-    file "${prefix}.sam"
+    file "images"
+    path "*.calmd_cov_window.txt", emit: window_txt
     
 
     script:
@@ -305,6 +348,80 @@ process plots {
 
     """
 }
+
+
+
+/*
+ *  Run growth rate
+ */
+
+process growth_rate {
+
+    cpus = 2
+	// If job fails, try again with more memory
+	memory { 8.GB * task.attempt }
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
+    //errorStrategy 'retry'
+
+    // Use conda env defined in nextflow.config file
+    conda params.conda_wochenende
+
+    tag "$name"
+    label 'process_medium'
+    
+       
+    if (params.save_align_intermeds) {
+        publishDir path: "${params.outdir}/growth_rate", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith('fit_results')) "$filename"
+                          else filename
+                    }
+    }
+    
+
+
+    input:
+    file bam
+    file bai
+    file bam_txt
+
+
+    output:
+    file "fit_results"
+    
+
+    script:
+    prefix = bam.name.toString().tokenize('.').get(0)
+    name = bam
+
+    // run growth_rate scripts from current directory to avoid linking and output problems
+    """
+    export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
+    export HAYBALER_DIR=${params.HAYBALER_DIR}
+
+    cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
+    bash get_wochenende.sh 
+
+
+
+    echo "INFO: Started bacterial growth rate analysis"
+    cd $launchDir
+    cp growth_rate/* .
+        
+    bash runbatch_bed_to_csv.sh  >/dev/null 2>&1 
+        
+    bash run_reproduction_determiner.sh  >/dev/null 2>&1
+     
+    cd $launchDir
+    echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
+
+
+    """
+}
+
+
+
 
 
 /*
@@ -510,6 +627,31 @@ process multiqc {
     """
     multiqc -f .
     
+    """
+
+}
+
+
+process metagen_window {
+    cpus = 2
+
+    conda params.conda_wochenende
+
+    publishDir path: "${params.outdir}", mode: params.publish_dir_mode
+
+    input:
+    file all
+    file window_txt
+
+    output:
+    path "*window.txt.filt.csv", emit: window_filt
+    path "*window.txt.filt.sort.csv", emit: window_sort
+
+    script:
+
+    """
+    cp ${params.WOCHENENDE_DIR}/scripts/runbatch_metagen_window_filter.sh .
+    bash runbatch_metagen_window_filter.sh
     """
 
 }
