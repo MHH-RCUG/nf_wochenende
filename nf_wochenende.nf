@@ -109,11 +109,14 @@ workflow {
     
     wochenende(input_fastq_R1, input_fastq_R2)
 
+    // run reporting
+    reporting(wochenende.out.bam_txts.flatten())
+
     // run plots on the calmd_bams only
     // plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
     // run growth_rate prediction software
-    growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+    // growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
 
     // generate alignment stats
     //bam_stats(wochenende.out)
@@ -123,6 +126,9 @@ workflow {
     
     // multiqc
     //multiqc(bam_stats.out.collect(), bam_stats.out)
+
+    // metagen window filter
+    // metagen_window(wochenende.out.all, plots.out.window_txt)
 
 
 }
@@ -189,6 +195,8 @@ process wochenende {
     path "*.bai"
     path "*.fastq"
     path "*.bam.txt", emit: bam_txts
+    path "*", emit: all
+    //path "ref.tmp", emit: ref_tmp
     
 
     script:
@@ -241,6 +249,37 @@ process wochenende {
 
 
 /*
+ * Run reporting
+ */
+
+process reporting {
+    cpus = 2
+
+    conda params.conda_wochenende
+
+    publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
+
+    input:
+    file bamtxt
+
+    output:
+    path "*csv", emit: csvs
+    path "*.rep.us.csv", emit: us_csvs
+    path "*.rep.s.csv", emit: s_csvs
+
+    script:
+
+    """
+    export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
+
+    cp ${params.WOCHENENDE_DIR}/reporting/basic_reporting.py .
+
+    python3 basic_reporting.py --input_file $bamtxt --reference /mnt/ngsnfs/seqres/metagenref/bwa/2021_12_human_bact_arch_fungi_vir.fa --sequencer illumina --output_name $bamtxt
+    """
+}
+
+
+/*
  *  Run plots
  */
 
@@ -279,6 +318,7 @@ process plots {
 
     output:
     file "images"
+    path "*.calmd_cov_window.txt", emit: window_txt
     
 
     script:
@@ -587,6 +627,31 @@ process multiqc {
     """
     multiqc -f .
     
+    """
+
+}
+
+
+process metagen_window {
+    cpus = 2
+
+    conda params.conda_wochenende
+
+    publishDir path: "${params.outdir}", mode: params.publish_dir_mode
+
+    input:
+    file all
+    file window_txt
+
+    output:
+    path "*window.txt.filt.csv", emit: window_filt
+    path "*window.txt.filt.sort.csv", emit: window_sort
+
+    script:
+
+    """
+    cp ${params.WOCHENENDE_DIR}/scripts/runbatch_metagen_window_filter.sh .
+    bash runbatch_metagen_window_filter.sh
     """
 
 }
