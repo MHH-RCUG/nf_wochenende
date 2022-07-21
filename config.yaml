@@ -25,8 +25,6 @@ adapter_truseq: /home/hpc/davenpor/programs/miniconda3/envs/wochenende/share/tri
 ea_adapter_fasta: /mnt/ngsnfs/seqres/contaminants/2020_02/adapters/adapters.fa
 # Paths to tools
 #path_abra_jar: /mnt/ngsnfs/tools/abra2/abra2_latest.jar
-#path_afterqc: /mnt/ngsnfs/tools/afterQC/AfterQC-0.9.6/after.py
-#path_alignerboost: /mnt/ngsnfs/tools/dev/Wochenende/dependencies/AlignerBoost.jar
 path_bamtools: bamtools
 path_bwa: bwa
 path_fastp: fastp
