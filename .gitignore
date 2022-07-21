@@ -4,3 +4,5 @@ work/*
 *html*
 *log*
 ref.fa.*
+test/data/human*fa
+test/data/ref.fa
