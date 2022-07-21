@@ -38,7 +38,8 @@ path_java: java
 path_minimap2: minimap2
 path_ngmlr: ngmlr
 path_perl: perl
-path_perldup: /mnt/ngsnfs/tools/dev/Wochenende/dependencies/remove_pcr_duplicates.pl
+#path_perldup: /mnt/ngsnfs/tools/dev/Wochenende/dependencies/remove_pcr_duplicates.pl
+path_perldup: remove_pcr_duplicates.pl
 path_prinseq: prinseq-lite.pl
 path_sambamba: sambamba
 path_samtools: samtools

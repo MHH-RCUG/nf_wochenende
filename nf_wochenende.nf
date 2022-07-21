@@ -15,7 +15,7 @@ v0.0.9
 v0.0.8  
 v0.0.7  
 v0.0.6  
-v0.0.5  
+v0.0.5  Remove get_wochenende.sh script functionality, still need WOCHENENDE_DIR defined in nextflow script for run_Wochenende.py
 v0.0.4  First plot semi-working, start growth rate, test with bigger data
 v0.0.3  Organize env variables, remove cluster submission bash code as now handled by nextflow
 v0.0.2  Setup args
@@ -67,8 +67,8 @@ params.mapping_quality = ""
 params.readType = ""
 params.debug = ""
 params.longread = ""
-// params.no_dup_removal = ""
-// params.no_prinseq = ""
+params.no_dup_removal = ""
+params.no_prinseq = ""
 params.no_fastqc = ""
 params.fastp = ""
 params.trim_galore = ""
@@ -90,7 +90,7 @@ if (params.help) {
 workflow {
 
     println "Starting run_nf_wochenende.nf"
-    println "Version 0.0.4 by Colin Davenport and Lisa Hollstein with many further contributors"
+    println "Version 0.0.5 by Colin Davenport and Lisa Hollstein with many further contributors"
 
     // File inputs
     //just R1 linked into dir
@@ -99,18 +99,18 @@ workflow {
     //input_fastq = Channel.fromPath("*_R{1,2}.fastq", checkIfExists: true)
     // Read inputs, SE read inputs should be possible
     input_fastq_R1 = Channel.fromPath("*_R1.fastq", checkIfExists: true)
-    input_fastq_R2 = Channel.fromPath("*_R2.fastq", checkIfExists: false)
+    //input_fastq_R2 = Channel.fromPath("*_R2.fastq", checkIfExists: false)
 
     chunksize = Channel.value(1000)
 
 
     // run processes
    
-    
-    wochenende(input_fastq_R1, input_fastq_R2)
+    wochenende(input_fastq_R1)
+    //wochenende(input_fastq_R1, input_fastq_R2)
 
     // run plots on the calmd_bams only
-    // plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
     // run growth_rate prediction software
     growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
@@ -170,7 +170,7 @@ process wochenende {
 
     input:
     file fastq
-    file fastq2
+    //file fastq2
 
 
     output:
@@ -192,13 +192,15 @@ process wochenende {
     
 
     script:
-    //prefix = fastq.name.toString().tokenize('.').get(0)
-    prefix = fastq.name.toString().tokenize('_').get(0)
     name = fastq
-    //fastq_R2=prefix + "_R2.fastq"
-    //print "Derived FASTQ R2 from R1 as: " + fastq_R2
-    print params.metagenome
-    print params.WOCHENENDE_DIR
+    //prefix = fastq.name.toString().tokenize('.').get(0)
+    String[] array
+    array = fastq.name.toString().split('_R1');
+    prefix = array[0]
+    fastq_R2 = prefix + "_R2.fastq"
+    println "Derived FASTQ R2 from R1 as: " + fastq_R2
+    println params.metagenome
+    println params.WOCHENENDE_DIR
 
     if (params.mapping_quality != "") {
        params.mq = "--" + params.mapping_quality
@@ -225,15 +227,25 @@ process wochenende {
     }
 
 
+    //export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
+    //export HAYBALER_DIR=${params.HAYBALER_DIR}
+
+    //cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
+    //bash get_wochenende.sh     
+
     """
     export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
     export HAYBALER_DIR=${params.HAYBALER_DIR}
+    cp -f ${params.WOCHENENDE_DIR}/*.py .
+    cp -f ${params.WOCHENENDE_DIR}/*.sh .
+    cp -f ${params.WOCHENENDE_DIR}/*.config .
+    cp -R ${params.WOCHENENDE_DIR}/scripts/ .
+    cp -R ${params.WOCHENENDE_DIR}/reporting/ .
+    cp -R ${params.WOCHENENDE_DIR}/dependencies/*.pl .
+    cp scripts/*.sh .
 
-    cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
-    bash get_wochenende.sh        
-
-
-    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --debug --force_restart $fastq
+    ln -s ${launchDir}/$fastq_R2 .
+    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
 
     """
 
@@ -286,12 +298,8 @@ process plots {
     name = bam
 
     """
-    export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
-    export HAYBALER_DIR=${params.HAYBALER_DIR}
-
-    cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
-    bash get_wochenende.sh 
-
+    cp -R ${params.WOCHENENDE_DIR}/plots/ .
+    cp -R ${params.WOCHENENDE_DIR}/scripts/ .
     cp scripts/*.sh .
     bash runbatch_sambamba_depth.sh
     
@@ -357,12 +365,9 @@ process growth_rate {
 
     // run growth_rate scripts from current directory to avoid linking and output problems
     """
-    export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
-    export HAYBALER_DIR=${params.HAYBALER_DIR}
-
-    cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
-    bash get_wochenende.sh 
-
+    cp -R ${params.WOCHENENDE_DIR}/growth_rate/ .
+    cp -R ${params.WOCHENENDE_DIR}/scripts/ .
+    cp scripts/*.sh .
 
 
     echo "INFO: Started bacterial growth rate analysis"
