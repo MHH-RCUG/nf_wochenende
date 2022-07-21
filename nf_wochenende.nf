@@ -5,7 +5,7 @@
 ========================================================================================
  Short and long read metagenomic alignment pipeline in Nextflow. Requires a fastq read file and a bwa indexed fasta reference genome 
 
- Colin Davenport 
+ Colin Davenport, Lisa Hollstein
 
  #### Homepage / Documentation Changelog
 
@@ -15,7 +15,7 @@ v0.0.9
 v0.0.8  
 v0.0.7  
 v0.0.6  
-v0.0.5  Remove get_wochenende.sh script functionality, still need WOCHENENDE_DIR defined in nextflow script for run_Wochenende.py
+v0.0.5  Remove get_wochenende.sh script functionality, still need WOCHENENDE_DIR defined in nextflow script for run_Wochenende.py, reporting semi-working, start metagen window filter
 v0.0.4  First plot semi-working, start growth rate, test with bigger data
 v0.0.3  Organize env variables, remove cluster submission bash code as now handled by nextflow
 v0.0.2  Setup args
@@ -109,11 +109,25 @@ workflow {
     wochenende(input_fastq_R1)
     //wochenende(input_fastq_R1, input_fastq_R2)
 
+    // run reporting
+    reporting(wochenende.out.bam_txts.flatten())
+
+    // run haybaler
+    haybaler(reporting.out.us_csvs.collect())
+
+    // create heattrees from haybaler output
+    // needs R server
+    //heattrees(haybaler.out.haybaler_heattree_csvs)
+
+    // create heatmaps from haybaler ouput
+    // needs R server
+    //heatmaps(haybaler.out.haybaler_csvs.flatten())
+
     // run plots on the calmd_bams only
     plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
     // run growth_rate prediction software
-    growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+    // growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
 
     // generate alignment stats
     //bam_stats(wochenende.out)
@@ -123,6 +137,9 @@ workflow {
     
     // multiqc
     //multiqc(bam_stats.out.collect(), bam_stats.out)
+
+    // metagen window filter
+    // metagen_window(wochenende.out.all, plots.out.window_txt)
 
 
 }
@@ -189,6 +206,8 @@ process wochenende {
     path "*.bai"
     path "*.fastq"
     path "*.bam.txt", emit: bam_txts
+    path "*", emit: all
+    //path "ref.tmp", emit: ref_tmp
     
 
     script:
@@ -253,6 +272,133 @@ process wochenende {
 
 
 /*
+ * Run reporting
+ */
+
+process reporting {
+    cpus = 16
+
+    conda params.conda_wochenende
+
+    publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
+
+    input:
+    file bamtxt
+
+    output:
+    path "*csv", emit: csvs
+    path "*.rep.us.csv", emit: us_csvs
+    path "*.rep.s.csv", emit: s_csvs
+
+    script:
+
+    """
+    export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
+
+    cp ${params.WOCHENENDE_DIR}/reporting/basic_reporting.py .
+
+    python3 basic_reporting.py --input_file $bamtxt --reference /mnt/ngsnfs/seqres/metagenref/bwa/2021_12_human_bact_arch_fungi_vir.fa --sequencer illumina --output_name $bamtxt
+    """
+}
+
+
+/*
+ * Run Haybaler
+ * Requires Haybaler to be installed
+ */
+
+process haybaler {
+
+    cpus = 12
+
+    conda params.conda_haybaler
+
+    publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
+
+    input:
+    file us_csv
+
+    output:
+    path "*haybaler*.csv", emit: haybaler_csvs
+    path "*haybaler.csv", emit: haybaler_heattree_csvs
+    path "haybaler_output"
+
+    script:
+
+    """
+    cp ${params.HAYBALER_DIR}/haybaler.py .
+    cp ${params.HAYBALER_DIR}/csv_to_xlsx_converter.py .
+    cp ${params.WOCHENENDE_DIR}/haybaler/run_haybaler.sh .
+
+    bash run_haybaler.sh
+    """
+}
+
+
+/*
+ * Run Heattrees
+ */
+
+process heattrees {
+    cpus = 12
+
+    conda params.conda_haybaler
+
+    publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
+
+    input:
+    file heattree_files
+
+    output:
+    path 'heattree_plots'
+    path '*.csv'
+
+    script:
+
+    """
+    cp ${params.WOCHENENDE_DIR}/haybaler/run_haybaler_tax.sh .
+    cp ${params.HAYBALER_DIR}/haybaler_taxonomy.py .
+
+    bash run_haybaler_tax.sh
+
+    cp ${params.WOCHENENDE_DIR}/haybaler/run_heattrees.sh .
+    cp ${params.HAYBALER_DIR}/create_heattrees.R .
+
+    bash run_heattrees.sh
+    """
+}
+
+
+/*
+ * Run Heatmaps
+ */
+
+process heatmaps {
+    cpus = 12
+
+    conda params.conda_haybaler
+
+    publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
+
+    input:
+    file heatmap_file
+
+    output:
+    path 'top*taxa/*'
+    path '*filt.heatmap.csv'
+
+    script:
+
+    """
+    cp ${params.WOCHENENDE_DIR}/runbatch_heatmaps.sh .
+    cp ${params.HAYBALER_DIR}/create_heatmap.R .
+
+    bash runbatch_heatmaps.sh
+    """
+}
+
+
+/*
  *  Run plots
  */
 
@@ -291,6 +437,7 @@ process plots {
 
     output:
     file "images"
+    path "*.calmd_cov_window.txt", emit: window_txt
     
 
     script:
@@ -592,6 +739,31 @@ process multiqc {
     """
     multiqc -f .
     
+    """
+
+}
+
+
+process metagen_window {
+    cpus = 2
+
+    conda params.conda_wochenende
+
+    publishDir path: "${params.outdir}", mode: params.publish_dir_mode
+
+    input:
+    file all
+    file window_txt
+
+    output:
+    path "*window.txt.filt.csv", emit: window_filt
+    path "*window.txt.filt.sort.csv", emit: window_sort
+
+    script:
+
+    """
+    cp ${params.WOCHENENDE_DIR}/scripts/runbatch_metagen_window_filter.sh .
+    bash runbatch_metagen_window_filter.sh
     """
 
 }
