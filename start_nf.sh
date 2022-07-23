@@ -29,8 +29,8 @@ cp -f test/data/*.fastq .
 # PE with dup removal
 #nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE --no_abra --fastq *R1.fastq
 
-# Single ended reads
-nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --fastq *R1.fastq
+# Single ended reads, with --ref not --metagenome
+nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/current/nf_wochenende/test/data/ref.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --fastq *R1.fastq
 
 
 
