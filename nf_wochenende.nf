@@ -58,7 +58,7 @@ params.save_align_intermeds=true
 params.outdir = "output"
 params.publish_dir_mode = "copy"
 params.fastq = ""
-params.metagenome = ""
+params.ref = ""
 params.aligner = ""
 params.mismatches = ""
 params.nextera = ""
@@ -93,22 +93,17 @@ workflow {
     println "Version 0.0.5 by Colin Davenport and Lisa Hollstein with many further contributors"
 
     // File inputs
-    //just R1 linked into dir
-    //input_fastq = Channel.fromPath(params.fastq, checkIfExists: true)
-    // both, but separate workflow dirs
-    //input_fastq = Channel.fromPath("*_R{1,2}.fastq", checkIfExists: true)
     // Read inputs, SE read inputs should be possible
     input_fastq_R1 = Channel.fromPath("*_R1.fastq", checkIfExists: true)
-    //input_fastq_R2 = Channel.fromPath("*_R2.fastq", checkIfExists: false)
 
     chunksize = Channel.value(1000)
 
 
     // run processes
    
+    // run main Wochenende process
     wochenende(input_fastq_R1)
-    //wochenende(input_fastq_R1, input_fastq_R2)
-
+    
     // run reporting
     reporting(wochenende.out.bam_txts.flatten())
 
@@ -218,7 +213,7 @@ process wochenende {
     prefix = array[0]
     fastq_R2 = prefix + "_R2.fastq"
     println "Derived FASTQ R2 from R1 as: " + fastq_R2
-    println params.metagenome
+    println params.ref
     println params.WOCHENENDE_DIR
 
     if (params.mapping_quality != "") {
@@ -264,7 +259,7 @@ process wochenende {
     cp scripts/*.sh .
 
     ln -s ${launchDir}/$fastq_R2 .
-    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
+    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
 
     """
 
@@ -276,11 +271,14 @@ process wochenende {
  */
 
 process reporting {
-    cpus = 16
+    cpus = 1
 
     conda params.conda_wochenende
+    errorStrategy 'ignore'
+    //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
+	
 
     input:
     file bamtxt
@@ -297,7 +295,7 @@ process reporting {
 
     cp ${params.WOCHENENDE_DIR}/reporting/basic_reporting.py .
 
-    python3 basic_reporting.py --input_file $bamtxt --reference /mnt/ngsnfs/seqres/metagenref/bwa/2021_12_human_bact_arch_fungi_vir.fa --sequencer illumina --output_name $bamtxt
+    python3 basic_reporting.py --input_file $bamtxt --reference ${params.ref} --sequencer illumina --output_name $bamtxt
     """
 }
 
@@ -309,9 +307,11 @@ process reporting {
 
 process haybaler {
 
-    cpus = 12
+    cpus = 1
 
     conda params.conda_haybaler
+	errorStrategy 'ignore'
+    //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
 
@@ -340,9 +340,11 @@ process haybaler {
  */
 
 process heattrees {
-    cpus = 12
+    cpus = 1
 
     conda params.conda_haybaler
+	errorStrategy 'ignore'
+    //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
 
@@ -374,9 +376,11 @@ process heattrees {
  */
 
 process heatmaps {
-    cpus = 12
+    cpus = 1
 
     conda params.conda_haybaler
+	errorStrategy 'ignore'
+    //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
 
@@ -404,7 +408,7 @@ process heatmaps {
 
 process plots {
 
-    cpus = 2
+    cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
 	//errorStrategy 'terminate'
@@ -472,7 +476,7 @@ process plots {
 
 process growth_rate {
 
-    cpus = 2
+    cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
 	//errorStrategy 'terminate'
@@ -595,7 +599,7 @@ process sort_bam {
 
 process bam_stats {
 
-    cpus = 8
+    cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
 	errorStrategy 'retry'
@@ -700,7 +704,7 @@ process convert_bam_cram {
  */
 
 process multiqc {
-    cpus = 2
+    cpus = 1
 	// If job fails, try again with more memory
 	memory { 4.GB * task.attempt }
 	errorStrategy 'retry'
@@ -745,7 +749,7 @@ process multiqc {
 
 
 process metagen_window {
-    cpus = 2
+    cpus = 1
 
     conda params.conda_wochenende
 
