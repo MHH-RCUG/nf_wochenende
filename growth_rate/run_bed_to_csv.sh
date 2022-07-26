@@ -59,7 +59,7 @@ count_bam_txt=`ls -1 ${bam%bam}bam.txt 2>/dev/null | wc -l`
 #fi
 
 # check if input exists
-count_bam=`ls -1 /*calmd.bam 2>/dev/null | wc -l`
+count_bam=`ls -1 *calmd.bam 2>/dev/null | wc -l`
 count_bai=`ls -1 *calmd.bam.bai 2>/dev/null | wc -l`
 count_bam_txt=`ls -1 *calmd.bam.txt 2>/dev/null | wc -l`
 
