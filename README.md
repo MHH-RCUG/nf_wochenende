@@ -38,3 +38,7 @@ Not touched to date
 * tidy all scripts to subdirs
 
 Note that that only process used in the run_nf_wochenende.nf file is wochenende (see the workflow section). Other processes might be needed later, or may be removed.
+
+![flowchart](https://user-images.githubusercontent.com/6094884/180654822-5d6d3129-e50a-485b-9fc8-52def87cb4b9.png)
+
+
