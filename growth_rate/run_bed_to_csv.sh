@@ -9,9 +9,11 @@
 
 # Bugs: if you experience problems, try deleting the growth_rate folder and running get_wochenende.sh again.
 
-echo "Version 0.19 of run_bed_to_csv.sh"
+echo "Version 0.21 of run_bed_to_csv.sh"
 
 # Changelog
+# 0.21 - search for bams in current dir 
+# 0.20 - remove detrimental file un/linking for nf_wochenende version
 # 0.19 - adaptation for nf_wochenende version
 # 0.18 - improve environment handling, concurrent job submission bugfix
 # 0.17 - remove previous results if present to avoid problems
@@ -39,34 +41,35 @@ echo "Version 0.19 of run_bed_to_csv.sh"
 #    exit 1
 #fi
 
-
-bam=${1/..\//}
+# Get bam files to process in current dir
+#bam=${1/..\//}
+bam=${1/.\//}
 
 # cleanup links from previous run in the current directory, if they were not unlinked properly
 count_bam=`ls -1 $bam 2>/dev/null | wc -l`
 count_bai=`ls -1 ${bam%bam}bam.bai 2>/dev/null | wc -l`
 count_bam_txt=`ls -1 ${bam%bam}bam.txt 2>/dev/null | wc -l`
 
-if [ $count_bam != 0 ]  && [ $count_bai != 0 ]  && [ $count_bam_txt != 0 ]
-  then
-  echo "INFO: cleanup links as previous run might not have completed properly: unlink bam, bai and bam.txt files"
-  unlink $bam
-  unlink ${bam%bam}bam.txt
-  unlink ${bam%bam}bam.bai
-fi
+#if [ $count_bam != 0 ]  && [ $count_bai != 0 ]  && [ $count_bam_txt != 0 ]
+#  then
+#  echo "INFO: cleanup links as previous run might not have completed properly: unlink bam, bai and bam.txt files"
+#  unlink $bam
+#  unlink ${bam%bam}bam.txt
+#  unlink ${bam%bam}bam.bai
+#fi
 
 # check if input exists
-count_bam=`ls -1 ../*calmd.bam 2>/dev/null | wc -l`
-count_bai=`ls -1 ../*calmd.bam.bai 2>/dev/null | wc -l`
-count_bam_txt=`ls -1 ../*calmd.bam.txt 2>/dev/null | wc -l`
+count_bam=`ls -1 *calmd.bam 2>/dev/null | wc -l`
+count_bai=`ls -1 *calmd.bam.bai 2>/dev/null | wc -l`
+count_bam_txt=`ls -1 *calmd.bam.txt 2>/dev/null | wc -l`
 
 if [ $count_bam != 0 ]  && [ $count_bai != 0 ]  && [ $count_bam_txt != 0 ]
   then
   # link bam, bai and bam.txt files found by ls command to current directory
   # $1 is the input bam file given as the first argument
-  ln -s $1 .
-  ln -s ${1/bam/bam.txt} .
-  ln -s ${1/bam/bam.bai} .
+  #ln -s $1 .
+  #ln -s ${1/bam/bam.txt} .
+  #ln -s ${1/bam/bam.bai} .
   #ls *
 
   bedtools bamtobed -i "$bam" > "${bam%.bam}.bed"
@@ -94,11 +97,11 @@ if [ $count_bam != 0 ]  && [ $count_bai != 0 ]  && [ $count_bam_txt != 0 ]
   fi
   echo "INFO: Completed file $bed"
 
-   echo "cleanup: unlink bam, bai and bam.txt files"
+   #echo "cleanup: unlink bam, bai and bam.txt files"
    # unlink bam, txt and bai files
-   unlink $bam
-   unlink ${bam%bam}bam.txt
-   unlink ${bam%bam}bam.bai
+   #unlink $bam
+   #unlink ${bam%bam}bam.txt
+   #unlink ${bam%bam}bam.bai
 else
   echo "ERROR: no bam.txt and bai found for input bam. Can't convert to pos.csv"
 fi

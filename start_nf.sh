@@ -7,11 +7,16 @@ git pull -q
 
 # ignore system JAVA_HOME, use that supplied by wochenende conda env for nextflow
 unset JAVA_HOME
+unset WOCHENENDE_DIR
+unset HAYBALER_DIR
 
-# cleanup work/ and get test files, create reference
+# cleanup work/ 
 rm -rf work
-cp test/data/*.fastq . && bwa index test/data/ref.fa
-
+# get test files, create reference (small files). Do it yourself for bigger test references 
+# eg mock community from SRA https://github.com/colindaven/wochenende_manuscript/blob/main/mock/download_fastq.sh
+# eg mock ref file human22_zymo_test.fa
+#cp -f test/data/*.fastq . && bwa index test/data/ref.fa
+#cp -f test/data/*.fastq .
 
 ############
 # run test
@@ -21,11 +26,11 @@ cp test/data/*.fastq . && bwa index test/data/ref.fa
 # lisa version with corrected args
 #nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE  --no_prinseq --no_abra --fastq *R1.fastq
 
-# with dup removal
-nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE --no_abra --fastq *R1.fastq
+# PE with dup removal
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE --no_abra --fastq *R1.fastq
 
-# Single ended reads
-#nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_dup_removal --no_abra --fastq *R1.fastq
+# Single ended reads, with --ref not --metagenome
+nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/current/nf_wochenende/test/data/ref.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --fastq *R1.fastq
 
 
 

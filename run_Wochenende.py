@@ -8,6 +8,7 @@ Author: Fabian Friedrich
 Author: Sophia Poertner
 
 Changelog
+2.0.2 Use full path to reference with --ref, deprecate --metagenome
 2.0.1 remove abra after security concerns with log4j
 2.0.0 allow configurable job scheduler in config.yaml
 1.9.9 calculate bam.bai in paired end mode for all outputs
@@ -74,7 +75,7 @@ import argparse
 import time
 import yaml
 
-version = "2.0.0 - Nov 2021"
+version = "2.0.2 - July 2022"
 
 
 ##############################
@@ -206,13 +207,14 @@ def createReftmpFile(args):
     # path_refseq_dict is filled with variables from the yaml file using the yaml parser and method "locals"
     try:
         with open("reporting/ref.tmp", mode="w") as f1:
-            f1.write(path_refseq_dict.get(args.metagenome))
+            #f1.write(path_refseq_dict.get(args.metagenome))
+            f1.write(args.ref)
     except OSError as e:
         print("Execution failed: Could not create reporting/ref.tmp or ref.tmp. Hint: did you run: bash get_wochenende.sh before starting?")
         sys.exit(1)
     try:
         with open("ref.tmp", mode="w") as f2:
-            f2.write(path_refseq_dict.get(args.metagenome))
+            f2.write(args.ref)
     except OSError as e:
         print("Execution failed: Could not create reporting/ref.tmp or ref.tmp. Hint: did you run: bash get_wochenende.sh before starting?")
         sys.exit(1)
@@ -1379,7 +1381,8 @@ def main(args, sys_argv):
     global progress_file
     progress_file = args.fastq + "progress.tmp"
     currentFile = createProgressFile(args)
-    print("Meta/genome selected: " + args.metagenome)
+    #print("Meta/genome selected: " + args.metagenome)
+    print("Reference Meta/genome selected: " + args.ref)
     # write Meta/genome ref to file
     createReftmpFile(args)
     threads = args.threads
@@ -1442,14 +1445,15 @@ def main(args, sys_argv):
             currentFile,
             True,
             args.aligner,
-            path_refseq_dict.get(args.metagenome),
+            #path_refseq_dict.get(args.metagenome),
+            args.ref,
             args.threads,
             args.readType,
         )
-        if args.runAlignerBoost:
-            currentFile = runFunc(
-                "runAlignerBoost", runAlignerBoost, currentFile, True, args.readType
-            )
+        #if args.runAlignerBoost:
+        #    currentFile = runFunc(
+        #        "runAlignerBoost", runAlignerBoost, currentFile, True, args.readType
+        #    )
         currentFile = runFunc(
             "runBAMsort", runBAMsort, currentFile, True, args.readType
         )
@@ -1510,7 +1514,8 @@ def main(args, sys_argv):
         #        threads,
         #    )
         currentFile = runFunc(
-            "calmd", calmd, currentFile, True, path_refseq_dict.get(args.metagenome)
+            #"calmd", calmd, currentFile, True, path_refseq_dict.get(args.metagenome)
+            "calmd", calmd, currentFile, True, args.ref
         )
         currentFile = runFunc("runBAMindex5", runBAMindex, currentFile, False)
         currentFile = runFunc("runIDXstats5", runIDXstats, currentFile, False)
@@ -1555,14 +1560,15 @@ def main(args, sys_argv):
             currentFile,
             True,
             args.aligner,
-            path_refseq_dict.get(args.metagenome),
+            #path_refseq_dict.get(args.metagenome),
+            args.ref,
             args.threads,
             args.readType,
         )
-        if args.runAlignerBoost:
-            currentFile = runFunc(
-                "runAlignerBoost", runAlignerBoost, currentFile, True, args.readType
-            )
+        #if args.runAlignerBoost:
+        #    currentFile = runFunc(
+        #        "runAlignerBoost", runAlignerBoost, currentFile, True, args.readType
+        #    )
         # PE reads need name sorted reads which went through fixmate before duplicate marking
         currentFile = runFunc(
             "runBAMsortByName1", runBAMsortByName, currentFile, True, args.readType
@@ -1627,12 +1633,14 @@ def main(args, sys_argv):
         #        abra,
         #        currentFile,
         #        True,
-        #        path_refseq_dict.get(args.metagenome),
+        #        #path_refseq_dict.get(args.metagenome),
+        #        args.ref,
         #        threads,
         #    )
         currentFile = runFunc("runBAMindex8", runBAMindex, currentFile, False)
         currentFile = runFunc(
-            "calmd", calmd, currentFile, True, path_refseq_dict.get(args.metagenome)
+            #"calmd", calmd, currentFile, True, path_refseq_dict.get(args.metagenome)
+            "calmd", calmd, currentFile, True, args.ref
         )
         currentFile = runFunc("runBAMindex5", runBAMindex, currentFile, False)
         currentFile = runFunc("runIDXstats5", runIDXstats, currentFile, False)
@@ -1681,11 +1689,17 @@ if __name__ == "__main__":
         default="SE",
     )
 
+    #parser.add_argument(
+    #    "--metagenome",
+    #    help="Meta/genome reference to use",
+    #    action="store",
+    #    choices=list(path_refseq_dict),
+    #)
+    
     parser.add_argument(
-        "--metagenome",
-        help="Meta/genome reference to use",
+        "--ref",
+        help="Meta/genome reference to use. Path. Replaces --metagenome",
         action="store",
-        choices=list(path_refseq_dict),
     )
 
     parser.add_argument(
@@ -1740,11 +1754,11 @@ if __name__ == "__main__":
         action="store_true",
     )
 
-    parser.add_argument(
-        "--runAlignerBoost",
-        help="Runs AlignerBoost Bayesian Mapping Quality calibration.",
-        action="store_true",
-    )
+    #parser.add_argument(
+    #    "--runAlignerBoost",
+    #    help="Runs AlignerBoost Bayesian Mapping Quality calibration.",
+    #    action="store_true",
+    #)
     
     parser.add_argument(
         "--mq20",

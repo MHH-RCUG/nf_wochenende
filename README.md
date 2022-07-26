@@ -8,8 +8,10 @@ This is a more portable version of the alignment pipeline Wochenende which uses 
 * Colin Davenport
 * Lisa Hollstein
 
-Work in progress (Spring-Summer 2022).
+# Work in progress (Spring-Summer 2022). Do not use 
 
+
+## Developer notes
 
 Running nf_wochenende
 * You **do not** need to edit and run setup.sh any more, this will be removed
@@ -28,6 +30,7 @@ If missing or 0 sized bams in output
 * Go into most recent folder and subfolder
 * ls -l 
 * cat .command.err
+* It could be that trimming files or perldup have not be located correctly
 
 
 Not touched to date
@@ -35,3 +38,7 @@ Not touched to date
 * tidy all scripts to subdirs
 
 Note that that only process used in the run_nf_wochenende.nf file is wochenende (see the workflow section). Other processes might be needed later, or may be removed.
+
+![flowchart](https://user-images.githubusercontent.com/6094884/180654822-5d6d3129-e50a-485b-9fc8-52def87cb4b9.png)
+
+
