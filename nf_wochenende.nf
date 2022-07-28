@@ -13,8 +13,8 @@ v0.1.1
 v0.1.0  
 v0.0.9  
 v0.0.8  
-v0.0.7  
-v0.0.6  
+v0.0.7  Plot (CD) and reporting (mainly Lisa) now fixed. Reporting fails if no data aligned to ref, fair enough.
+v0.0.6  Add new mock reference seq and fast5 mock files for testing
 v0.0.5  Remove get_wochenende.sh script functionality, still need WOCHENENDE_DIR defined in nextflow script for run_Wochenende.py, reporting semi-working, start metagen window filter
 v0.0.4  First plot semi-working, start growth rate, test with bigger data
 v0.0.3  Organize env variables, remove cluster submission bash code as now handled by nextflow
@@ -58,7 +58,7 @@ params.save_align_intermeds=true
 params.outdir = "output"
 params.publish_dir_mode = "copy"
 params.fastq = ""
-params.metagenome = ""
+params.ref = ""
 params.aligner = ""
 params.mismatches = ""
 params.nextera = ""
@@ -90,27 +90,22 @@ if (params.help) {
 workflow {
 
     println "Starting run_nf_wochenende.nf"
-    println "Version 0.0.5 by Colin Davenport and Lisa Hollstein with many further contributors"
+    println "Version 0.0.7 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
 
     // File inputs
-    //just R1 linked into dir
-    //input_fastq = Channel.fromPath(params.fastq, checkIfExists: true)
-    // both, but separate workflow dirs
-    //input_fastq = Channel.fromPath("*_R{1,2}.fastq", checkIfExists: true)
     // Read inputs, SE read inputs should be possible
     input_fastq_R1 = Channel.fromPath("*_R1.fastq", checkIfExists: true)
-    //input_fastq_R2 = Channel.fromPath("*_R2.fastq", checkIfExists: false)
 
     chunksize = Channel.value(1000)
 
 
     // run processes
    
+    // run main Wochenende process
     wochenende(input_fastq_R1)
-    //wochenende(input_fastq_R1, input_fastq_R2)
-
+    
     // run reporting
-    reporting(wochenende.out.bam_txts.flatten())
+    reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
     haybaler(reporting.out.us_csvs.collect())
@@ -126,8 +121,8 @@ workflow {
     // run plots on the calmd_bams only
     plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
-    // run growth_rate prediction software
-    // growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+    // run growth_rate prediction step
+    growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
 
     // generate alignment stats
     //bam_stats(wochenende.out)
@@ -138,7 +133,7 @@ workflow {
     // multiqc
     //multiqc(bam_stats.out.collect(), bam_stats.out)
 
-    // metagen window filter
+    // metagen window filter - @Lisa - I think this step is covered in plots and or growth rate so might not be needed?
     // metagen_window(wochenende.out.all, plots.out.window_txt)
 
 
@@ -206,6 +201,7 @@ process wochenende {
     path "*.bai"
     path "*.fastq"
     path "*.bam.txt", emit: bam_txts
+    path "*.calmd.bam.txt", emit: calmd_bam_txts
     path "*", emit: all
     //path "ref.tmp", emit: ref_tmp
     
@@ -218,7 +214,7 @@ process wochenende {
     prefix = array[0]
     fastq_R2 = prefix + "_R2.fastq"
     println "Derived FASTQ R2 from R1 as: " + fastq_R2
-    println params.metagenome
+    println params.ref
     println params.WOCHENENDE_DIR
 
     if (params.mapping_quality != "") {
@@ -264,7 +260,7 @@ process wochenende {
     cp scripts/*.sh .
 
     ln -s ${launchDir}/$fastq_R2 .
-    python3 run_Wochenende.py --metagenome ${params.metagenome} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
+    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
 
     """
 
@@ -276,11 +272,16 @@ process wochenende {
  */
 
 process reporting {
-    cpus = 16
+    cpus = 1
 
     conda params.conda_wochenende
-
+    //errorStrategy 'ignore'
+    errorStrategy 'terminate'
+    
+    tag "$name"
+    label 'process_medium'
     publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
+	
 
     input:
     file bamtxt
@@ -291,13 +292,14 @@ process reporting {
     path "*.rep.s.csv", emit: s_csvs
 
     script:
+    name = bamtxt
 
     """
     export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
 
     cp ${params.WOCHENENDE_DIR}/reporting/basic_reporting.py .
 
-    python3 basic_reporting.py --input_file $bamtxt --reference /mnt/ngsnfs/seqres/metagenref/bwa/2021_12_human_bact_arch_fungi_vir.fa --sequencer illumina --output_name $bamtxt
+    python3 basic_reporting.py --input_file $bamtxt --reference ${params.ref} --sequencer illumina --output_name $bamtxt
     """
 }
 
@@ -309,9 +311,14 @@ process reporting {
 
 process haybaler {
 
-    cpus = 12
+    cpus = 1
 
     conda params.conda_haybaler
+	errorStrategy 'ignore'
+    //errorStrategy 'terminate'
+    
+    tag "$name"
+    label 'process_medium'
 
     publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
 
@@ -324,6 +331,7 @@ process haybaler {
     path "haybaler_output"
 
     script:
+    name = us_csv
 
     """
     cp ${params.HAYBALER_DIR}/haybaler.py .
@@ -340,9 +348,11 @@ process haybaler {
  */
 
 process heattrees {
-    cpus = 12
+    cpus = 1
 
     conda params.conda_haybaler
+	errorStrategy 'ignore'
+    //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
 
@@ -374,9 +384,11 @@ process heattrees {
  */
 
 process heatmaps {
-    cpus = 12
+    cpus = 1
 
     conda params.conda_haybaler
+	errorStrategy 'ignore'
+    //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
 
@@ -404,11 +416,11 @@ process heatmaps {
 
 process plots {
 
-    cpus = 2
+    cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	//errorStrategy 'terminate'
-    errorStrategy 'ignore'
+	errorStrategy 'terminate'
+    //errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -421,7 +433,7 @@ process plots {
     if (params.save_align_intermeds) {
         publishDir path: "${params.outdir}/plots", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith('images')) "$filename"
+                          if (filename.endsWith('plots')) "$filename"
                           else filename
                     }
     }
@@ -431,12 +443,10 @@ process plots {
     input:
     file bam
     file bai
-    //file fastq
-    //file bam_txt
 
 
     output:
-    file "images"
+    file "plots"
     path "*.calmd_cov_window.txt", emit: window_txt
     
 
@@ -449,7 +459,7 @@ process plots {
     cp -R ${params.WOCHENENDE_DIR}/scripts/ .
     cp scripts/*.sh .
     bash runbatch_sambamba_depth.sh
-    
+    bash runbatch_metagen_window_filter.sh
     echo "INFO: Completed Sambamba depth and filtering"
 
     echo "INFO: Started Wochenende plot"
@@ -472,11 +482,11 @@ process plots {
 
 process growth_rate {
 
-    cpus = 2
+    cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	//errorStrategy 'terminate'
-    errorStrategy 'ignore'
+	errorStrategy 'terminate'
+    //errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -503,8 +513,8 @@ process growth_rate {
 
 
     output:
+    file "growth_rate"
     file "fit_results"
-    
 
     script:
     prefix = bam.name.toString().tokenize('.').get(0)
@@ -518,14 +528,13 @@ process growth_rate {
 
 
     echo "INFO: Started bacterial growth rate analysis"
-    cd $launchDir
     cp growth_rate/* .
         
     bash runbatch_bed_to_csv.sh  >/dev/null 2>&1 
         
     bash run_reproduction_determiner.sh  >/dev/null 2>&1
      
-    cd $launchDir
+    
     echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
 
 
@@ -595,7 +604,7 @@ process sort_bam {
 
 process bam_stats {
 
-    cpus = 8
+    cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
 	errorStrategy 'retry'
@@ -700,7 +709,7 @@ process convert_bam_cram {
  */
 
 process multiqc {
-    cpus = 2
+    cpus = 1
 	// If job fails, try again with more memory
 	memory { 4.GB * task.attempt }
 	errorStrategy 'retry'
@@ -745,7 +754,7 @@ process multiqc {
 
 
 process metagen_window {
-    cpus = 2
+    cpus = 1
 
     conda params.conda_wochenende
 
