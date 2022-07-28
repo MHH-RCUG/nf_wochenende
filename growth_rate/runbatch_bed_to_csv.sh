@@ -23,9 +23,11 @@ count_subsamp=`ls -1 *_subsamples 2>/dev/null | wc -l`
 
 if [ $count_bed != 0 ]
   then
-  rm *.bed
+  echo "Not removing bed"
+  #rm *.bed
 fi
 if [ $count_subsamp != 0 ]
   then
-  rm -rf *_subsamples/
+  echo "Not removing _subsamples, needed in next step"
+  #rm -rf *_subsamples/
 fi
