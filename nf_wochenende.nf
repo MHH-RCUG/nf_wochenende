@@ -213,9 +213,11 @@ process wochenende {
     array = fastq.name.toString().split('_R1');
     prefix = array[0]
     fastq_R2 = prefix + "_R2.fastq"
-    println "Derived FASTQ R2 from R1 as: " + fastq_R2
-    println params.ref
-    println params.WOCHENENDE_DIR
+    if (params.readType == "PE") {
+        println "Derived FASTQ R2 from R1 as: " + fastq_R2
+    }
+    println "Using reference sequence: " + params.ref
+    println "Using WOCHENENDE_DIR" + params.WOCHENENDE_DIR
 
     if (params.mapping_quality != "") {
        params.mq = "--" + params.mapping_quality
