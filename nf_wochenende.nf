@@ -105,7 +105,7 @@ workflow {
     wochenende(input_fastq_R1)
     
     // run reporting
-    reporting(wochenende.out.calmd_bam_txts.flatten())
+    //reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
     haybaler(reporting.out.us_csvs.collect())
@@ -119,10 +119,15 @@ workflow {
     //heatmaps(haybaler.out.haybaler_csvs.flatten())
 
     // run plots on the calmd_bams only
-    plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    //plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
     // run growth_rate prediction step
-    growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+    //growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+
+    // run raspir steps
+    raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    raspir(raspir_fileprep.collect())
+
 
     // generate alignment stats
     //bam_stats(wochenende.out)
