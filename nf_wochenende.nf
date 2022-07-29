@@ -105,7 +105,7 @@ workflow {
     wochenende(input_fastq_R1)
     
     // run reporting
-    //reporting(wochenende.out.calmd_bam_txts.flatten())
+    reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
     haybaler(reporting.out.us_csvs.collect())
