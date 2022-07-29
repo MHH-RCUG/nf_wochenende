@@ -591,12 +591,10 @@ process raspir_fileprep {
     prefix = bam.name.toString().tokenize('.').get(0)
     name = bam
 
-    // run growth_rate scripts from current directory to avoid linking and output problems
     """
     cp -R ${params.WOCHENENDE_DIR}/raspir/ .
     cp -R ${params.WOCHENENDE_DIR}/scripts/ .
     cp scripts/*.sh .
-
 
     echo "INFO: Started raspir analysis"
     cp raspir/* .
@@ -641,17 +639,15 @@ process raspir {
 
 
     input:
-    file bam
-    file bai
+    file input_csv
 
     output:
     path "*.csv"
 
     script:
-    prefix = bam.name.toString().tokenize('.').get(0)
-    name = bam
+    prefix = input_csv.name.toString().tokenize('.').get(0)
+    name = input_csv
 
-    // run growth_rate scripts from current directory to avoid linking and output problems
     """
     cp -R ${params.WOCHENENDE_DIR}/raspir/ .
     cp -R ${params.WOCHENENDE_DIR}/scripts/ .
@@ -660,8 +656,8 @@ process raspir {
     echo "INFO: Started raspir analysis"
     cp raspir/* .
 
-    python raspir.py $i ${i%.csv} >/dev/null 2>&1
-    echo "INFO: Completed raspir "
+    python raspir.py $input_csv ${prefix}.csv >/dev/null 2>&1
+    echo "INFO: Completed raspir"
 
     """
   
