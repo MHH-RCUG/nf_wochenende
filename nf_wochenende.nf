@@ -430,8 +430,8 @@ process plots {
     cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
-    //errorStrategy 'ignore'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -496,8 +496,8 @@ process growth_rate {
     cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
-    //errorStrategy 'ignore'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -563,8 +563,8 @@ process raspir_fileprep {
     cpus = 8
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
-    //errorStrategy 'ignore'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -610,8 +610,8 @@ process raspir {
     cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
-    //errorStrategy 'ignore'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
