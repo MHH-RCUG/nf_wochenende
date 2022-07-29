@@ -8,6 +8,7 @@ Author: Fabian Friedrich
 Author: Sophia Poertner
 
 Changelog
+2.0.3 ref.tmp file creation deprecated
 2.0.2 Use full path to reference with --ref, deprecate --metagenome
 2.0.1 remove abra after security concerns with log4j
 2.0.0 allow configurable job scheduler in config.yaml
@@ -202,22 +203,22 @@ def addToProgress(func_name, c_file):
     return progress_lines[1].replace("\n", "")
 
 
-def createReftmpFile(args):
-    # Write refseq as one line (overwrite) in file reporting/ref.tmp and ./ref.tmp
-    # path_refseq_dict is filled with variables from the yaml file using the yaml parser and method "locals"
-    try:
-        with open("reporting/ref.tmp", mode="w") as f1:
-            #f1.write(path_refseq_dict.get(args.metagenome))
-            f1.write(args.ref)
-    except OSError as e:
-        print("Execution failed: Could not create reporting/ref.tmp or ref.tmp. Hint: did you run: bash get_wochenende.sh before starting?")
-        sys.exit(1)
-    try:
-        with open("ref.tmp", mode="w") as f2:
-            f2.write(args.ref)
-    except OSError as e:
-        print("Execution failed: Could not create reporting/ref.tmp or ref.tmp. Hint: did you run: bash get_wochenende.sh before starting?")
-        sys.exit(1)
+#def createReftmpFile(args):
+#    # Write refseq as one line (overwrite) in file reporting/ref.tmp and ./ref.tmp
+#    # path_refseq_dict is filled with variables from the yaml file using the yaml parser and method "locals"
+#    try:
+#        with open("reporting/ref.tmp", mode="w") as f1:
+#            #f1.write(path_refseq_dict.get(args.metagenome))
+#            f1.write(args.ref)
+#    except OSError as e:
+#        print("Execution failed: Could not create reporting/ref.tmp or ref.tmp. Hint: did you run: bash get_wochenende.sh before starting?")
+#        sys.exit(1)
+#    try:
+#        with open("ref.tmp", mode="w") as f2:
+#            f2.write(args.ref)
+#    except OSError as e:
+#        print("Execution failed: Could not create reporting/ref.tmp or ref.tmp. Hint: did you run: bash get_wochenende.sh before starting?")
+#        sys.exit(1)
 
 def runFunc(func_name, func, cF, newCurrentFile, *extraArgs):
     """
@@ -1384,7 +1385,7 @@ def main(args, sys_argv):
     #print("Meta/genome selected: " + args.metagenome)
     print("Reference Meta/genome selected: " + args.ref)
     # write Meta/genome ref to file
-    createReftmpFile(args)
+    #createReftmpFile(args)
     threads = args.threads
     global inputFastq
     inputFastq = args.fastq

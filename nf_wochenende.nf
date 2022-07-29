@@ -536,7 +536,6 @@ process growth_rate {
         
     bash run_reproduction_determiner.sh  >/dev/null 2>&1
      
-    
     echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
 
 
@@ -544,6 +543,124 @@ process growth_rate {
 }
 
 
+
+
+/*
+ *  Run raspir file preparation 
+ */
+
+process raspir_fileprep {
+
+    cpus = 8
+	// If job fails, try again with more memory
+	memory { 8.GB * task.attempt }
+	errorStrategy 'terminate'
+    //errorStrategy 'ignore'
+    //errorStrategy 'retry'
+
+    // Use conda env defined in nextflow.config file
+    conda params.conda_haybaler
+
+    tag "$name"
+    label 'process_medium'
+    
+       
+    if (params.save_align_intermeds) {
+        publishDir path: "${params.outdir}/raspir_fileprep", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith('*.raspir.csv')) "$filename"
+                          else filename
+                    }
+    }
+    
+
+
+    input:
+    file bam
+    file bai
+
+    output:
+    path "*.raspir.csv"
+
+    script:
+    prefix = bam.name.toString().tokenize('.').get(0)
+    name = bam
+
+    // run growth_rate scripts from current directory to avoid linking and output problems
+    """
+    cp -R ${params.WOCHENENDE_DIR}/raspir/ .
+    cp -R ${params.WOCHENENDE_DIR}/scripts/ .
+    cp scripts/*.sh .
+
+
+    echo "INFO: Started raspir analysis"
+    cp raspir/* .
+
+    bash run_SLURM_file_prep.sh $bam >/dev/null 2>&1
+         
+    echo "INFO: Completed raspir module"
+
+    """
+  
+}
+
+
+/*
+ *  Run raspir
+ */
+
+process raspir {
+
+    cpus = 1
+	// If job fails, try again with more memory
+	memory { 8.GB * task.attempt }
+	errorStrategy 'terminate'
+    //errorStrategy 'ignore'
+    //errorStrategy 'retry'
+
+    // Use conda env defined in nextflow.config file
+    conda params.conda_haybaler
+
+    tag "$name"
+    label 'process_medium'
+    
+       
+    if (params.save_align_intermeds) {
+        publishDir path: "${params.outdir}/raspir", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith('*.csv')) "$filename"
+                          else filename
+                    }
+    }
+    
+
+
+    input:
+    file bam
+    file bai
+
+    output:
+    path "*.csv"
+
+    script:
+    prefix = bam.name.toString().tokenize('.').get(0)
+    name = bam
+
+    // run growth_rate scripts from current directory to avoid linking and output problems
+    """
+    cp -R ${params.WOCHENENDE_DIR}/raspir/ .
+    cp -R ${params.WOCHENENDE_DIR}/scripts/ .
+    cp scripts/*.sh .
+
+    echo "INFO: Started raspir analysis"
+    cp raspir/* .
+
+    python raspir.py $i ${i%.csv} >/dev/null 2>&1
+    echo "INFO: Completed raspir "
+
+    """
+  
+}
 
 
 

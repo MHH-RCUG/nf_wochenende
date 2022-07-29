@@ -69,23 +69,23 @@ bam_prefix=$(echo ${bam_fullname} | sed 's/.bam//')
 #bam_prefix=
 fname=$bam_prefix
 
-   		# Obtain coverage information
-   		samtools depth ${fname}.bam | grep -v $human_chr_pattern  > ${fname}.raspir1.csv
+# Obtain coverage information
+samtools depth ${fname}.bam | grep -v $human_chr_pattern  > ${fname}.raspir1.csv
 
-   		# Add genome size, pipe in a BAM header only
-   		samtools view -H ${bam_fullname} | sed 's/LN://g' > ${fname}.genomeSize_1.csv
-   		sed -i 's/SN://g' ${fname}.genomeSize_1.csv
-   		cut -f2- ${fname}.genomeSize_1.csv > ${fname}.genomeSize.csv
+# Add genome size, pipe in a BAM header only
+samtools view -H ${bam_fullname} | sed 's/LN://g' > ${fname}.genomeSize_1.csv
+sed -i 's/SN://g' ${fname}.genomeSize_1.csv
+cut -f2- ${fname}.genomeSize_1.csv > ${fname}.genomeSize.csv
 
-   		# Add column with genome size
-		awk -v FS="\t" -v OFS="\t" 'FNR==NR{a[$1]=$2;next;} {if(a[$1]) {print a[$1], $0} else {print "NA",$0}}' \
-		${fname}.genomeSize.csv ${fname}.raspir1.csv > ${fname}.raspir.csv
+# Add column with genome size
+awk -v FS="\t" -v OFS="\t" 'FNR==NR{a[$1]=$2;next;} {if(a[$1]) {print a[$1], $0} else {print "NA",$0}}' \
+${fname}.genomeSize.csv ${fname}.raspir1.csv > ${fname}.raspir.csv
 
-		# Convert into a comma-separated file
-		sed -i 's/\t/,/g' ${fname}.raspir.csv
-		# Add header
-		sed -i '1iGenomeLength,Organism,Position,Depth\' ${fname}.raspir.csv
+# Convert into a comma-separated file
+sed -i 's/\t/,/g' ${fname}.raspir.csv
+# Add header
+sed -i '1iGenomeLength,Organism,Position,Depth\' ${fname}.raspir.csv
 
-		# Remove intermediate files
-		rm ${fname}.raspir1.csv ${fname}.genomeSize_1.csv ${fname}.genomeSize.csv
+# Remove intermediate files
+rm ${fname}.raspir1.csv ${fname}.genomeSize_1.csv ${fname}.genomeSize.csv
 #	done
