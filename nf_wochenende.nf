@@ -11,8 +11,8 @@
 
 v0.1.1  
 v0.1.0  
-v0.0.9  
-v0.0.8  
+v0.0.9  Raspir integration underway
+v0.0.8  Growth_rate fixed, plotting colours improved
 v0.0.7  Plot (CD) and reporting (mainly Lisa) now fixed. Reporting fails if no data aligned to ref, fair enough.
 v0.0.6  Add new mock reference seq and fast5 mock files for testing
 v0.0.5  Remove get_wochenende.sh script functionality, still need WOCHENENDE_DIR defined in nextflow script for run_Wochenende.py, reporting semi-working, start metagen window filter
@@ -90,7 +90,7 @@ if (params.help) {
 workflow {
 
     println "Starting run_nf_wochenende.nf"
-    println "Version 0.0.7 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
+    println "Version 0.0.8 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
 
     // File inputs
     // Read inputs, SE read inputs should be possible
@@ -108,7 +108,7 @@ workflow {
     reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
-    haybaler(reporting.out.us_csvs.collect())
+    //haybaler(reporting.out.us_csvs.collect())
 
     // create heattrees from haybaler output
     // needs R server
@@ -123,6 +123,12 @@ workflow {
 
     // run growth_rate prediction step
     growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+
+    // run raspir steps
+    raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+
+    raspir(raspir_fileprep.out.collect())
+
 
     // generate alignment stats
     //bam_stats(wochenende.out)
@@ -213,9 +219,11 @@ process wochenende {
     array = fastq.name.toString().split('_R1');
     prefix = array[0]
     fastq_R2 = prefix + "_R2.fastq"
-    println "Derived FASTQ R2 from R1 as: " + fastq_R2
-    println params.ref
-    println params.WOCHENENDE_DIR
+    if (params.readType == "PE") {
+        println "Derived FASTQ R2 from R1 as: " + fastq_R2
+    }
+    println "Using reference sequence: " + params.ref
+    println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
 
     if (params.mapping_quality != "") {
        params.mq = "--" + params.mapping_quality
@@ -259,7 +267,10 @@ process wochenende {
     cp -R ${params.WOCHENENDE_DIR}/dependencies/*.pl .
     cp scripts/*.sh .
 
-    ln -s ${launchDir}/$fastq_R2 .
+    if [[ $params.readType == "PE" ]]
+        then
+        ln -s ${launchDir}/$fastq_R2 .
+    fi
     python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
 
     """
@@ -419,8 +430,8 @@ process plots {
     cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
-    //errorStrategy 'ignore'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -485,8 +496,8 @@ process growth_rate {
     cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
-    //errorStrategy 'ignore'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -534,7 +545,6 @@ process growth_rate {
         
     bash run_reproduction_determiner.sh  >/dev/null 2>&1
      
-    
     echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
 
 
@@ -542,6 +552,108 @@ process growth_rate {
 }
 
 
+
+
+/*
+ *  Run raspir file preparation 
+ */
+
+process raspir_fileprep {
+
+    cpus = 8
+	// If job fails, try again with more memory
+	memory { 8.GB * task.attempt }
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
+    //errorStrategy 'retry'
+
+    // Use conda env defined in nextflow.config file
+    conda params.conda_haybaler
+
+    tag "$name"
+    label 'process_medium'
+    
+
+
+    input:
+    file bam
+    file bai
+
+    output:
+    path "*.raspir.csv"
+
+    script:
+    prefix = bam.name.toString().tokenize('.').get(0)
+    name = bam
+
+    """
+    cp -R ${params.WOCHENENDE_DIR}/raspir/ .
+
+    echo "INFO: Started raspir analysis"
+    cp raspir/* .
+
+    bash run_SLURM_file_prep.sh $bam >/dev/null 2>&1
+         
+    echo "INFO: Completed raspir module"
+
+    """
+  
+}
+
+
+/*
+ *  Run raspir
+ */
+
+process raspir {
+
+    cpus = 1
+	// If job fails, try again with more memory
+	memory { 8.GB * task.attempt }
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
+    //errorStrategy 'retry'
+
+    // Use conda env defined in nextflow.config file
+    conda params.conda_haybaler
+
+    tag "$name"
+    label 'process_medium'
+    
+       
+    if (params.save_align_intermeds) {
+        publishDir path: "${params.outdir}/raspir", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith('*.csv')) "$filename"
+                          else filename
+                    }
+    }
+    
+
+
+    input:
+    file input_csv
+
+    output:
+    path "*.csv"
+
+    script:
+    prefix = input_csv.name.toString().tokenize('.').get(0)
+    name = input_csv
+
+    """
+    cp -R ${params.WOCHENENDE_DIR}/raspir/ .
+    cp -R ${params.WOCHENENDE_DIR}/scripts/ .
+    
+    echo "INFO: Started raspir analysis"
+    cp raspir/* .
+
+    python raspir.py $input_csv ${prefix}.csv >/dev/null 2>&1
+    echo "INFO: Completed raspir"
+
+    """
+  
+}
 
 
 
