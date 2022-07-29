@@ -222,7 +222,7 @@ process wochenende {
         println "Derived FASTQ R2 from R1 as: " + fastq_R2
     }
     println "Using reference sequence: " + params.ref
-    println "Using WOCHENENDE_DIR" + params.WOCHENENDE_DIR
+    println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
 
     if (params.mapping_quality != "") {
        params.mq = "--" + params.mapping_quality
@@ -266,7 +266,10 @@ process wochenende {
     cp -R ${params.WOCHENENDE_DIR}/dependencies/*.pl .
     cp scripts/*.sh .
 
-    ln -s ${launchDir}/$fastq_R2 .
+    if [[ $params.readType == "PE" ]]
+        then
+        ln -s ${launchDir}/$fastq_R2 .
+    fi
     python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
 
     """
