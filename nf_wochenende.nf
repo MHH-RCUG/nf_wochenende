@@ -11,8 +11,8 @@
 
 v0.1.1  
 v0.1.0  
-v0.0.9  
-v0.0.8  
+v0.0.9  Raspir integration underway
+v0.0.8  Growth_rate fixed, plotting colours improved
 v0.0.7  Plot (CD) and reporting (mainly Lisa) now fixed. Reporting fails if no data aligned to ref, fair enough.
 v0.0.6  Add new mock reference seq and fast5 mock files for testing
 v0.0.5  Remove get_wochenende.sh script functionality, still need WOCHENENDE_DIR defined in nextflow script for run_Wochenende.py, reporting semi-working, start metagen window filter
@@ -90,7 +90,7 @@ if (params.help) {
 workflow {
 
     println "Starting run_nf_wochenende.nf"
-    println "Version 0.0.7 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
+    println "Version 0.0.8 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
 
     // File inputs
     // Read inputs, SE read inputs should be possible
