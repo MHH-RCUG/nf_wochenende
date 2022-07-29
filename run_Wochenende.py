@@ -76,7 +76,7 @@ import argparse
 import time
 import yaml
 
-version = "2.0.2 - July 2022"
+version = "2.0.3 - July 2022"
 
 
 ##############################
@@ -84,13 +84,13 @@ version = "2.0.2 - July 2022"
 ##############################
 
 # get the config file from a BASH variable (you must configure and run setup.sh before running run_Wochenende.py)
-global config_path
-if os.environ["WOCHENENDE_DIR"] != None:
-    woch_dir_bash = os.environ["WOCHENENDE_DIR"] 
-    config_path = woch_dir_bash + "/config.yaml"
-    print("INFO: Config file path: " + config_path)
-else:
-    print("Error: could not get the config file from the BASH variable $WOCHENENDE_DIR (you must configure and run setup.sh before running run_Wochenende.py)")
+#global config_path
+#if os.environ["WOCHENENDE_DIR"] != None:
+#    woch_dir_bash = os.environ["WOCHENENDE_DIR"] 
+#    config_path = woch_dir_bash + "/config.yaml"
+#    print("INFO: Config file path: " + config_path)
+#else:
+#    print("Error: could not get the config file from the BASH variable $WOCHENENDE_DIR (you must configure and run setup.sh before running run_Wochenende.py)")
 
 with open(config_path, 'r') as stream:
     try:
