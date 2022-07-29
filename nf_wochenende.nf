@@ -127,7 +127,7 @@ workflow {
     // run raspir steps
     raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
-    //raspir(raspir_fileprep.collect())
+    raspir(raspir_fileprep.out.collect())
 
 
     // generate alignment stats
