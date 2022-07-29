@@ -593,8 +593,6 @@ process raspir_fileprep {
 
     """
     cp -R ${params.WOCHENENDE_DIR}/raspir/ .
-    cp -R ${params.WOCHENENDE_DIR}/scripts/ .
-    cp scripts/*.sh .
 
     echo "INFO: Started raspir analysis"
     cp raspir/* .
@@ -651,8 +649,7 @@ process raspir {
     """
     cp -R ${params.WOCHENENDE_DIR}/raspir/ .
     cp -R ${params.WOCHENENDE_DIR}/scripts/ .
-    cp scripts/*.sh .
-
+    
     echo "INFO: Started raspir analysis"
     cp raspir/* .
 
