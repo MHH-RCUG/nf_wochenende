@@ -16,7 +16,7 @@ unset HAYBALER_DIR
 # get test files, create reference (small files). Do it yourself for bigger test references 
 # eg mock community from SRA https://github.com/colindaven/wochenende_manuscript/blob/main/mock/download_fastq.sh
 # eg mock ref file human22_zymo_test.fa
-bwa index test/data/ref.fa
+#bwa index test/data/ref.fa
 #cp -f test/data/*.fastq . && bwa index test/data/ref.fa
 #cp -f test/data/*.fastq .
 
