@@ -108,7 +108,7 @@ workflow {
     reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
-    //haybaler(reporting.out.us_csvs.collect())
+    haybaler(reporting.out.us_csvs.collect())
 
     // create heattrees from haybaler output
     // needs R server
