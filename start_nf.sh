@@ -11,10 +11,12 @@ unset WOCHENENDE_DIR
 unset HAYBALER_DIR
 
 # cleanup work/ 
-rm -rf work
+#rm -rf work
+
 # get test files, create reference (small files). Do it yourself for bigger test references 
 # eg mock community from SRA https://github.com/colindaven/wochenende_manuscript/blob/main/mock/download_fastq.sh
 # eg mock ref file human22_zymo_test.fa
+bwa index test/data/ref.fa
 #cp -f test/data/*.fastq . && bwa index test/data/ref.fa
 #cp -f test/data/*.fastq .
 
@@ -35,6 +37,8 @@ rm -rf work
 # big reference
 nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --fastq *R1.fastq 
 
+# big reference, long read
+#nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner minimap2long --mismatches 30 --mapping_quality mq30 --readType SE --longread --no_abra --fastq *R1.fastq 
 
 
 
