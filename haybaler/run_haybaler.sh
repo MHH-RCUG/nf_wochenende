@@ -28,6 +28,7 @@ if [[ $count == 1 ]]
     then
     do
       echo "ERROR: Haybaler needs 2 or more input CSV files to work. Use 2+ fastq files for the nf_wochenende pipeline."
+      break
     done
 fi
 
