@@ -325,13 +325,13 @@ process haybaler {
     cpus = 1
 
     conda params.conda_haybaler
-	errorStrategy 'ignore'
-    //errorStrategy 'terminate'
+	//errorStrategy 'ignore'
+    errorStrategy 'terminate'
     
     tag "$name"
     label 'process_medium'
 
-    publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
+    publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
 
     input:
     file us_csv
