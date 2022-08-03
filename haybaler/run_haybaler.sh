@@ -3,7 +3,7 @@
 # Based on the original script run_haybaler.sh by Sophia Poertner
 # Run haybaler https://github.com/MHH-RCUG/haybaler/
 
-version="0.22, June 2021"
+version="0.23, August 2022"
 
 outputDir=haybaler_output
 if [[ ! -d $outputDir ]]
@@ -24,6 +24,13 @@ if [[ $count != 0 ]]
       input_files="$input_files;$csv"
     done
 fi
+if [[ $count == 1 ]]
+    then
+    do
+      echo "ERROR: Haybaler needs 2 or more input CSV files to work. Use 2+ fastq files for the nf_wochenende pipeline."
+    done
+fi
+
 
 
 # Only run for *bam*.txt if files exist in current dir
