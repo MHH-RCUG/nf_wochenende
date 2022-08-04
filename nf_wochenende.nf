@@ -456,7 +456,7 @@ process plots {
 
 
     output:
-    file "plots"
+    file "${bam}_plots/"
     path "*.calmd_cov_window.txt", emit: window_txt
     
 
@@ -478,6 +478,7 @@ process plots {
     cp ../*_window.txt.filt.csv .
     bash runbatch_wochenende_plot.sh >/dev/null 2>&1
     cd $launchDir
+    mv plots ${bam}_plots 
     echo "INFO: Completed Wochenende plot"
 
 
@@ -523,8 +524,8 @@ process growth_rate {
 
 
     output:
-    file "growth_rate"
-    file "fit_results"
+    //file "growth_rate/*"
+    file "fit_results/*"
 
     script:
     prefix = bam.name.toString().tokenize('.').get(0)
