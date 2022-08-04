@@ -98,9 +98,12 @@ workflow {
 
     chunksize = Channel.value(1000)
 
+    println "Using reference sequence: " + params.ref
+    println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
+
 
     // run processes
-   
+
     // run main Wochenende process
     wochenende(input_fastq_R1)
     
@@ -222,8 +225,7 @@ process wochenende {
     if (params.readType == "PE") {
         println "Derived FASTQ R2 from R1 as: " + fastq_R2
     }
-    println "Using reference sequence: " + params.ref
-    println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
+
 
     if (params.mapping_quality != "") {
        params.mq = "--" + params.mapping_quality
