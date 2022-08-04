@@ -339,9 +339,9 @@ process haybaler {
     file us_csv
 
     output:
-    path "*haybaler*.csv", emit: haybaler_csvs
-    path "*haybaler.csv", emit: haybaler_heattree_csvs
-    path "haybaler_output"
+    path "haybaler_output/*haybaler*.csv", emit: haybaler_csvs
+    path "haybaler_output/*haybaler.csv", emit: haybaler_heattree_csvs
+    path "haybaler_output/logs"
 
     script:
     name = us_csv
