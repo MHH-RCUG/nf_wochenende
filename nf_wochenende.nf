@@ -111,9 +111,8 @@ workflow {
     reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
-    //haybaler(reporting.out.us_csvs.collect())
-    haybaler(reporting.out.us_csvs.collect().flatten())
-
+    haybaler(reporting.out.us_csvs.collect())
+    
     // create heattrees from haybaler output
     // needs R server configured in config.yml
     heattrees(haybaler.out.haybaler_heattree_csvs)
@@ -342,7 +341,8 @@ process haybaler {
     path "haybaler_output/logs"
 
     script:
-    name = us_csv
+    prefix = us_csv.name.toString().tokenize('.').get(0)
+    name = prefix
 
     """
     cp ${params.HAYBALER_DIR}/haybaler.py .
