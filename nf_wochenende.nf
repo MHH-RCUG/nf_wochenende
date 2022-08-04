@@ -479,8 +479,8 @@ process plots {
     cp ../*_window.txt . 
     cp ../*_window.txt.filt.csv .
     bash runbatch_wochenende_plot.sh >/dev/null 2>&1
-    cd $launchDir
     mv plots ${bam}_plots 
+        
     echo "INFO: Completed Wochenende plot"
 
 
