@@ -26,10 +26,8 @@ if [[ $count != 0 ]]
 fi
 if [[ $count == 1 ]]
     then
-    do
-      echo "ERROR: Haybaler needs 2 or more input CSV files to work. Use 2+ fastq files for the nf_wochenende pipeline."
+      echo "ERROR: Haybaler needs 2 or more input CSV files to work. Use 2+ fastq files for the nf_wochenende pipeline or deselect haybaler in nf_wochenende.nf."
       exit 1
-    done
 fi
 
 
