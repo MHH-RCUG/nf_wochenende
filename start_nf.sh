@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "bash script to start the nf_wochenende pipeline"
-echo "Requires nextflow and bwa in path. Maybe do this first: conda activate wochenende"
+echo "Requires nextflow in path. In case of problems, activate environment: conda activate wochenende"
 
 # get most current version - for developers
 git pull -q
@@ -11,7 +11,7 @@ unset WOCHENENDE_DIR
 unset HAYBALER_DIR
 
 # cleanup work/ 
-#rm -rf work
+rm -rf work
 
 # get test files, create reference (small files). Do it yourself for bigger test references 
 # eg mock community from SRA https://github.com/colindaven/wochenende_manuscript/blob/main/mock/download_fastq.sh

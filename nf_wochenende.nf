@@ -130,8 +130,8 @@ workflow {
     // run raspir steps
     raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
-    raspir(raspir_fileprep.out.collect())
-
+    //raspir(raspir_fileprep.out.collect())
+    raspir(raspir_fileprep.out)
 
     // generate alignment stats
     //bam_stats(wochenende.out)
@@ -633,6 +633,7 @@ process raspir {
 
     input:
     file input_csv
+    //each file input_csv
 
     output:
     path "*.csv"
