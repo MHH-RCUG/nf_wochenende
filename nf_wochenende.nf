@@ -115,11 +115,11 @@ workflow {
 
     // create heattrees from haybaler output
     // needs R server
-    //heattrees(haybaler.out.haybaler_heattree_csvs)
+    heattrees(haybaler.out.haybaler_heattree_csvs)
 
     // create heatmaps from haybaler ouput
     // needs R server
-    //heatmaps(haybaler.out.haybaler_csvs.flatten())
+    heatmaps(haybaler.out.haybaler_csvs.flatten())
 
     // run plots on the calmd_bams only
     //plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
@@ -367,7 +367,7 @@ process heattrees {
 	errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
-    publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
+    publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
 
     input:
     file heattree_files
@@ -403,7 +403,7 @@ process heatmaps {
 	errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
-    publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
+    publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
 
     input:
     file heatmap_file
