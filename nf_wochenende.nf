@@ -111,7 +111,7 @@ workflow {
     reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
-    haybaler(reporting.out.us_csvs.collect())
+    haybaler(reporting.out.us_csvs.collect().flatten())
     
     // create heattrees from haybaler output
     // needs R server configured in config.yml
@@ -343,6 +343,7 @@ process haybaler {
     script:
     prefix = us_csv.name.toString().tokenize('.').get(0)
     name = prefix
+    println(prefix)
 
     """
     cp ${params.HAYBALER_DIR}/haybaler.py .
@@ -430,8 +431,8 @@ process plots {
     cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	//errorStrategy 'terminate'
-    errorStrategy 'ignore'
+	errorStrategy 'terminate'
+    //errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
