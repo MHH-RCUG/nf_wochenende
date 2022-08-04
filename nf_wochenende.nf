@@ -445,7 +445,7 @@ process plots {
     if (params.save_align_intermeds) {
         publishDir path: "${params.outdir}/plots", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith('images')) "$filename"
+                          if (filename.endsWith('R1')) "$filename"
                           else filename
                     }
     }
@@ -458,7 +458,7 @@ process plots {
 
 
     output:
-    file "${bam}_images/"
+    path "plots/images/*"
     path "*.calmd_cov_window.txt", emit: window_txt
     
 
@@ -479,7 +479,7 @@ process plots {
     cp ../*_window.txt . 
     cp ../*_window.txt.filt.csv .
     bash runbatch_wochenende_plot.sh >/dev/null 2>&1
-    mv images ${bam}_images 
+    
         
     echo "INFO: Completed Wochenende plot"
 
