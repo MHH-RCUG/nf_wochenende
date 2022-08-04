@@ -10,7 +10,7 @@
  #### Homepage / Documentation Changelog
 
 v0.1.1  
-v0.1.0  
+v0.1.0  Raspir done, heat trees and heatmaps need to be manually tested as no R server in cluster
 v0.0.9  Raspir integration underway
 v0.0.8  Growth_rate fixed, plotting colours improved
 v0.0.7  Plot (CD) and reporting (mainly Lisa) now fixed. Reporting fails if no data aligned to ref, fair enough.
@@ -90,7 +90,7 @@ if (params.help) {
 workflow {
 
     println "Starting run_nf_wochenende.nf"
-    println "Version 0.0.8 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
+    println "Version 0.1.0 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
 
     // File inputs
     // R1 Read inputs, R2 reads are linked in by the process if they exist.
@@ -153,8 +153,9 @@ workflow {
 
 /*
  *  Run wochenende
- *  Parcels the python script into a single Nextflow process
+ *  Parcels the run_Wochenende.py python script into a single Nextflow process
  *  Output - sorted bams for each step, and bam.txt files with read counts per chromosome.
+ *  Terminates on error, since this step provides data for all further steps.
  */
 
 process wochenende {
@@ -191,12 +192,9 @@ process wochenende {
 
     input:
     file fastq
-    //file fastq2
 
 
     output:
-    //file "${prefix}*s.bam"
-    //file "${prefix}*s.bam.bai"
     path "*.bam", emit: bams
     path "*.s.bam", emit: s_bams
     path "*.calmd.bam", emit: calmd_bams
@@ -212,7 +210,6 @@ process wochenende {
     path "*.bam.txt", emit: bam_txts
     path "*.calmd.bam.txt", emit: calmd_bam_txts
     path "*.*", emit: all
-    //path "ref.tmp", emit: ref_tmp
     
 
     script:

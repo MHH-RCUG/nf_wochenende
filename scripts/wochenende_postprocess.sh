@@ -2,7 +2,7 @@
 # Automated postprocessing of results from the Wochenende pipeline, with wochenende reporting and haybaler.
 # Authors: Colin Davenport, Sophia Poertner
 
-version="DEPRECATED July 2022 - replaced by run_wochenende.nf, will be deleted soon. 0.37, Jan 2022."
+version="DEPRECATED July 2022 - replaced by run_wochenende.nf, will be deleted soon. 0.37, August 2022."
 
 #Changelog
 #0.37 - DEPRECATED
