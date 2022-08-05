@@ -343,9 +343,7 @@ process haybaler {
     path "haybaler_output/logs"
 
     script:
-    prefix = us_csv.name.toString().tokenize('.').get(0)
-    name = prefix
-    println(prefix)
+    name = "haybaler_input"
 
     """
     cp ${params.HAYBALER_DIR}/haybaler.py .
