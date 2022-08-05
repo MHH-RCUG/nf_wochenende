@@ -101,6 +101,31 @@ workflow {
     println "Using reference sequence: " + params.ref
     println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
 
+    // Parameters - throw warnings at present
+    if (params.mapping_quality != "") {
+       params.mq = "--" + params.mapping_quality
+    } else {
+       params.mq = ""
+    }
+
+    if (params.no_abra) {
+       params.abra = "--no_abra"
+    } else {
+       params.abra = ""
+    }
+
+    if (params.no_dup_removal) {
+       params.no_duplicate_removal = "--no_duplicate_removal"
+    } else {
+       params.no_duplicate_removal = ""
+    } 
+
+    if (params.no_prinseq) {
+       params.prinseq = "--no_prinseq"
+    } else {
+       params.prinseq = ""
+    }
+
 
     // run processes
 
@@ -226,30 +251,6 @@ process wochenende {
     }
 
 
-    if (params.mapping_quality != "") {
-       params.mq = "--" + params.mapping_quality
-    } else {
-       params.mq = ""
-    }
-
-    if (params.no_abra) {
-       params.abra = "--no_abra"
-    } else {
-       params.abra = ""
-    }
-
-    if (params.no_dup_removal) {
-       params.no_duplicate_removal = "--no_duplicate_removal"
-    } else {
-       params.no_duplicate_removal = ""
-    } 
-
-    if (params.no_prinseq) {
-       params.prinseq = "--no_prinseq"
-    } else {
-       params.prinseq = ""
-    }
-
 
     """
     export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
@@ -264,6 +265,7 @@ process wochenende {
 
     if [[ $params.readType == "PE" ]]
         then
+        echo "Trying to link in R2, the second pair of the paired end reads"
         ln -s ${launchDir}/$fastq_R2 .
     fi
     python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
