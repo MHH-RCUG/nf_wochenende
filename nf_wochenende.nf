@@ -9,7 +9,7 @@
 
  #### Homepage / Documentation Changelog
 
-v0.1.1  
+v0.1.1  Haybaler args passed from nextflow.config
 v0.1.0  Raspir done, heat trees and heatmaps need to be manually tested as no R server in cluster
 v0.0.9  Raspir integration underway
 v0.0.8  Growth_rate fixed, plotting colours improved
@@ -90,7 +90,7 @@ if (params.help) {
 workflow {
 
     println "Starting run_nf_wochenende.nf"
-    println "Version 0.1.0 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
+    println "Version 0.1.1 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
 
     // File inputs
     // R1 Read inputs, R2 reads are linked in by the process if they exist.
@@ -265,7 +265,8 @@ process wochenende {
 
     if [[ $params.readType == "PE" ]]
         then
-        echo "Trying to link in R2, the second pair of the paired end reads"
+        echo "readType PE found."
+        echo "Trying to link in R2, the second pair of the paired end reads. Will fail if does not exist (use --readType SE in that case)"
         ln -s ${launchDir}/$fastq_R2 .
     fi
     python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
