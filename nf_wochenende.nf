@@ -162,9 +162,10 @@ process wochenende {
 
     cpus = 16
 	// If job fails, try again with more memory
-	//memory { 40.GB * task.attempt }
-    memory 40.GB
-	errorStrategy 'terminate'
+	memory { 40.GB * task.attempt }
+    //memory 40.GB
+	//errorStrategy 'terminate'
+    errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
     // TODO - make a singularity container
@@ -429,7 +430,7 @@ process heatmaps {
 process plots {
 
     cpus = 1
-	// If job fails, try again with more memory
+	// If job fails, try again with more memory if retry set
 	memory { 8.GB * task.attempt }
 	errorStrategy 'terminate'
     //errorStrategy 'ignore'
