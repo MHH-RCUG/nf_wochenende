@@ -339,12 +339,51 @@ process haybaler {
     script:
     name = "haybaler_input"
 
+    // full run haybaler moved here to allow easy parameter changes
+    // # Only run for *bam*.csv if files exist in current dir
+    // # Only run for *bam*.txt if files exist in current dir
+    // # Use  --readcount_limit 1 --rpmm_limit 10 for pipeline testing, use nextflow.config
+
     """
     cp ${params.HAYBALER_DIR}/haybaler.py .
     cp ${params.HAYBALER_DIR}/csv_to_xlsx_converter.py .
     cp ${params.WOCHENENDE_DIR}/haybaler/run_haybaler.sh .
 
-    bash run_haybaler.sh
+    outputDir="haybaler_output"
+    mkdir -p $outputDir
+
+    input_files=""
+    count=$(ls -1 *.bam*.csv 2>/dev/null | wc -l)
+    if [[ $count != 0 ]]
+        then
+        for csv in *.bam*.csv
+            do
+            input_files="$input_files;$csv"
+        done
+    fi
+    if [[ $count == 1 ]]
+        then
+        echo "ERROR: Haybaler needs 2 or more input CSV files to work. Use 2+ fastq files for the nf_wochenende pipeline or deselect haybaler in nf_wochenende.nf."
+        exit 1
+    fi
+
+    count=$(ls -1 *.bam*.txt 2>/dev/null | wc -l)
+    if [[ $count != 0 ]]
+        then
+        for csv in *.bam*.txt
+            do
+            input_files="$input_files;$csv"
+        done
+    fi
+
+    python3 haybaler.py -i "$input_files" -p . -op $outputDir  -o haybaler.csv --readcount_limit params.haybaler_readcount_limit --rpmm_limit params.haybaler_rpmm_limit
+    
+    mkdir -p $outputDir/logs
+    mv $outputDir/excluded_taxa.csv $outputDir/logs/
+
+
+
+
     """
 }
 
