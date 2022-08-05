@@ -23,25 +23,25 @@ rm -rf work
 ############
 # run test
 ###########
-#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --remove_mismatching 2 --mq30 --readType PE  --no_dup_removal --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --remove_mismatching 2 --mq30 --readType PE  --no_dup_removal --no_abra --no_prinseq --fastq *R1.fastq
 
 # lisa version with corrected args
-#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE  --no_prinseq --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE  --no_prinseq --no_abra --no_prinseq --fastq *R1.fastq
 
 # PE with dup removal
-#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE --no_abra --no_prinseq --fastq *R1.fastq
 
 # Single ended reads, with --ref not --metagenome
-#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --no_prinseq --fastq *R1.fastq
 
 # big reference
-#nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --fastq *R1.fastq 
+#nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --no_prinseq --fastq *R1.fastq 
 
 # big reference, long read
-#nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner minimap2long --mismatches 30 --mapping_quality mq30 --readType SE --longread --no_abra --fastq *R1.fastq 
+#nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner minimap2long --mismatches 30 --mapping_quality mq30 --readType SE --longread --no_abra --no_prinseq --fastq *R1.fastq 
 
 #small ref, faster reporting
-nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/current/nf_wochenende/test/data/ref.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --fastq *R1.fastq 
+nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/current/nf_wochenende/test/data/ref.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --no_prinseq --fastq *R1.fastq 
 
 
 
