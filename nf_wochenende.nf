@@ -251,12 +251,6 @@ process wochenende {
     }
 
 
-    //export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
-    //export HAYBALER_DIR=${params.HAYBALER_DIR}
-
-    //cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
-    //bash get_wochenende.sh     
-
     """
     export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
     export HAYBALER_DIR=${params.HAYBALER_DIR}
