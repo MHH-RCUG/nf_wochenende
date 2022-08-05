@@ -349,7 +349,7 @@ process haybaler {
     cp ${params.HAYBALER_DIR}/csv_to_xlsx_converter.py .
     cp ${params.WOCHENENDE_DIR}/haybaler/run_haybaler.sh .
 
-    bash run_haybaler.sh params.haybaler_readcount_limit params.haybaler_rpmm_limit
+    bash run_haybaler.sh ${params.haybaler_readcount_limit} ${params.haybaler_rpmm_limit}
 
 
 
