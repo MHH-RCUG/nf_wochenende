@@ -3,7 +3,7 @@ echo "bash script to start the nf_wochenende pipeline"
 echo "Requires nextflow in path. In case of problems, activate environment: conda activate wochenende"
 
 # get most current version - for developers
-git pull -q
+#git pull -q
 
 # ignore system JAVA_HOME, use that supplied by wochenende conda env for nextflow
 unset JAVA_HOME
