@@ -9,6 +9,14 @@
 
  #### Homepage / Documentation Changelog
 
+v0.1.9
+v0.1.8
+v0.1.7
+v0.1.6
+v0.1.5
+v0.1.4
+v0.1.3
+v0.1.2
 v0.1.1  Haybaler args passed from nextflow.config
 v0.1.0  Raspir done, heat trees and heatmaps need to be manually tested as no R server in cluster
 v0.0.9  Raspir integration underway
@@ -90,7 +98,7 @@ if (params.help) {
 workflow {
 
     println "Starting run_nf_wochenende.nf"
-    println "Version 0.1.1 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
+    println "Version 0.1.1 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
 
     // File inputs
     // R1 Read inputs, R2 reads are linked in by the process if they exist.
@@ -158,18 +166,9 @@ workflow {
 
     //raspir(raspir_fileprep.out.collect())
     raspir(raspir_fileprep.out)
-
-    // generate alignment stats
-    //bam_stats(wochenende.out)
-
-    // convert bam to cram format
-    //convert_bam_cram(sort_bam.out)
     
     // multiqc
     //multiqc(bam_stats.out.collect(), bam_stats.out)
-
-    // metagen window filter - @Lisa - I think this step is covered in plots and or growth rate so might not be needed?
-    // metagen_window(wochenende.out.all, plots.out.window_txt)
 
 
 }
@@ -666,110 +665,6 @@ process raspir {
 
 
 
-/*
- *  Convert BAM to coordinate sorted BAM, make stats, flagstat, idxstats
- */
-
-process sort_bam {
-
-    cpus = 8
-	// If job fails, try again with more memory
-	memory { 32.GB * task.attempt }
-	errorStrategy 'retry'
-
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
-
-
-    tag "$name"
-    label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/samtools", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith('.flagstat')) "$filename" 
-                          else if (filename.endsWith('.idxstats')) "$filename" 
-                          else if (filename.endsWith('.stats')) "$filename" 
-                          else filename
-                    }
-    }
-
-
-    input:
-    file bam
-
-
-    output:
-    file "${prefix}.sorted.bam"
-    file "${prefix}.sorted.bam.bai"
-    file "${prefix}.sorted.bam.flagstat"
-    file "${prefix}.sorted.bam.idxstats"
-    file "${prefix}.sorted.bam.stats"
-
-    script:
-    prefix = bam.name.toString().tokenize('.').get(0)
-    name = bam
-
-    """
-    samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -T $name $bam
-    samtools index ${prefix}.sorted.bam
-    samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
-    samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
-    samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
-    """
-}
-
-
-
-/*
- *  make bam stats, flagstat, idxstats
- */
-
-process bam_stats {
-
-    cpus = 1
-	// If job fails, try again with more memory
-	memory { 8.GB * task.attempt }
-	errorStrategy 'retry'
-
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
-
-
-    tag "$name"
-    label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/samtools", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith('.flagstat')) "$filename" 
-                          else if (filename.endsWith('.idxstats')) "$filename" 
-                          else if (filename.endsWith('.stats')) "$filename" 
-                          else filename
-                    }
-    }
-
-
-    input:
-    file bam
-    file bai
-    file fastq
-    file bam_txt
-
-
-
-    output:
-    file "${prefix}.sorted.bam.flagstat"
-    file "${prefix}.sorted.bam.idxstats"
-    file "${prefix}.sorted.bam.stats"
-
-    script:
-    prefix = bam.name.toString().tokenize('.').get(0)
-    name = bam
-
-    """
-    samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
-    samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
-    samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
-    """
-}
-
 
 /*
  *  Convert BAM to coordinate sorted BAM, make stats, flagstat, idxstats
@@ -873,27 +768,3 @@ process multiqc {
 
 }
 
-
-process metagen_window {
-    cpus = 1
-
-    conda params.conda_wochenende
-
-    publishDir path: "${params.outdir}", mode: params.publish_dir_mode
-
-    input:
-    file all
-    file window_txt
-
-    output:
-    path "*window.txt.filt.csv", emit: window_filt
-    path "*window.txt.filt.sort.csv", emit: window_sort
-
-    script:
-
-    """
-    cp ${params.WOCHENENDE_DIR}/scripts/runbatch_metagen_window_filter.sh .
-    bash runbatch_metagen_window_filter.sh
-    """
-
-}
