@@ -40,7 +40,7 @@ def helpMessage() {
     Usage:
     The typical command for running the pipeline is:
       conda activate nextflow
-      nextflow run run_nf_wochenende.nf  --fasta /path/to/x.fa --fastq /path/x.fastq
+      nextflow run nf_wochenende.nf  --fasta /path/to/x.fa --fastq /path/x.fastq
 
 
     Arguments - all fully defined in script start.sh:
@@ -97,7 +97,7 @@ if (params.help) {
 
 workflow {
 
-    println "Starting run_nf_wochenende.nf"
+    println "Starting nf_wochenende.nf"
     println "Version 0.1.1 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
 
     // File inputs
