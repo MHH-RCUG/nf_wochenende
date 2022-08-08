@@ -41,8 +41,10 @@ rm -rf work
 #nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner minimap2long --mismatches 30 --mapping_quality mq30 --readType SE --longread --no_abra --no_prinseq --fastq *R1.fastq 
 
 #small ref, faster reporting
-nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/current/nf_wochenende/test/data/ref.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --no_prinseq --fastq *R1.fastq 
+#nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/current/nf_wochenende/test/data/ref.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --no_prinseq --fastq *R1.fastq 
 
+#small ref, faster reporting
+nextflow run nf_wochenende.nf  -with-timeline -with-report --fastq *R1.fastq 
 
 
 
