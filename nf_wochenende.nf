@@ -109,14 +109,13 @@ workflow {
     println "Using reference sequence: " + params.ref
     println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
     println "Using this HAYBALER_DIR: " + params.HAYBALER_DIR
-    println "Using this fastq setting: " + params.fastq
+    println "Using this readType setting: " + params.readType
     println "Using this longread setting: " + params.longread
     println "Using this aligner setting: " + params.aligner
     println "Using this mismatches setting: " + params.mismatches
     println "Using this nextera setting: " + params.nextera
-    //println "Using this abra setting: " + params.abra
+    println "Using this abra setting: " + params.abra
     println "Using this mapping_quality setting: " + params.mapping_quality
-    println "Using this readType setting: " + params.readType
     println "Using this no_dup_removal setting: " + params.no_dup_removal
     println "Using this no_prinseq setting: " + params.no_prinseq
     println "Using this no_fastqc setting: " + params.no_fastqc
