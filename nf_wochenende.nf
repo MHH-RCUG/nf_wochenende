@@ -124,6 +124,17 @@ workflow {
     println "########### End settings ##############"
 
     // Parameters - throw warnings at present
+    // Need to remap the boolean parameters and create a new py parameter that python can understand. eg longread = true: pylongread = "--longread", false: pylongread = ""
+    longread = true             // Are reads from ONT or Pacbio? Recommend minimap2long aligner
+    no_dup_removal = false      // Do not remove duplicate reads
+    nextera = false             // Use illumina nextera adapter trimming
+    abra = false                // Use abra realignment (True, False)
+    no_prinseq = true           // Filter reads using prinseq (only for short reads)
+    no_fastqc = true            // Do not run fastqc
+    fastp = false               // Use fastp trimming tool (short reads)
+    trim_galore = false         // Use trim_galore trimmer (short reads)
+
+
     if (params.mapping_quality != "") {
        params.mq = "--" + params.mapping_quality
     } else {
