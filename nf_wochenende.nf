@@ -249,7 +249,7 @@ process wochenende {
     path "*.fastq"
     path "*.bam.txt", emit: bam_txts
     path "*.calmd.bam.txt", emit: calmd_bam_txts
-    path "*.*", emit: all
+    //path "*.*", emit: all       // lets avoid this, else we get scripts in the output dir
     
 
     script:
