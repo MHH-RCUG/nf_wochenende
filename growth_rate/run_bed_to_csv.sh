@@ -43,7 +43,7 @@ echo "Version 0.21 of run_bed_to_csv.sh"
 
 # Get bam files to process in current dir
 #bam=${1/..\//}
-bam=${1/.\//}
+bam=${1/\//}
 
 # cleanup links from previous run in the current directory, if they were not unlinked properly
 count_bam=`ls -1 $bam 2>/dev/null | wc -l`
