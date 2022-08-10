@@ -1,9 +1,9 @@
 #!/bin/bash
 echo "bash script to start the nf_wochenende pipeline"
-echo "Requires nextflow and bwa in path. Maybe do this first: conda activate wochenende"
+echo "Requires nextflow in path. In case of problems, activate environment: conda activate wochenende"
 
-# get most current version
-git pull -q
+# get most current version - for developers
+#git pull -q
 
 # ignore system JAVA_HOME, use that supplied by wochenende conda env for nextflow
 unset JAVA_HOME
@@ -12,29 +12,39 @@ unset HAYBALER_DIR
 
 # cleanup work/ 
 rm -rf work
+
 # get test files, create reference (small files). Do it yourself for bigger test references 
 # eg mock community from SRA https://github.com/colindaven/wochenende_manuscript/blob/main/mock/download_fastq.sh
 # eg mock ref file human22_zymo_test.fa
+#bwa index test/data/ref.fa
 #cp -f test/data/*.fastq . && bwa index test/data/ref.fa
 #cp -f test/data/*.fastq .
 
 ############
 # run test
 ###########
-#nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --remove_mismatching 2 --mq30 --readType PE  --no_dup_removal --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --remove_mismatching 2 --mq30 --readType PE  --no_dup_removal --no_abra --no_prinseq --fastq *R1.fastq
 
 # lisa version with corrected args
-#nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE  --no_prinseq --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE  --no_prinseq --no_abra --no_prinseq --fastq *R1.fastq
 
 # PE with dup removal
-#nextflow run nf_wochenende.nf  -with-timeline -with-report --metagenome testdb --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType PE --no_abra --no_prinseq --fastq *R1.fastq
 
 # Single ended reads, with --ref not --metagenome
-nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/current/nf_wochenende/test/data/ref.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --fastq *R1.fastq
+#nextflow run nf_wochenende.nf  -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --no_prinseq --fastq *R1.fastq
 
+# big reference
+#nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --no_prinseq --fastq *R1.fastq 
 
+# big reference, long read
+#nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/seqres/metagenref/wochenende/2021_12_human_bact_arch_fungi_vir.fa --aligner minimap2long --mismatches 30 --mapping_quality mq30 --readType SE --longread --no_abra --no_prinseq --fastq *R1.fastq 
 
+#small ref, faster reporting
+#nextflow run nf_wochenende.nf  -resume -with-timeline -with-report --ref /mnt/beegfs/scratch/bioinformatics/colin/dev/nf_wochenende/current/nf_wochenende/test/data/ref.fa --aligner bwamem --mismatches 2 --mapping_quality mq30 --readType SE  --no_abra --no_prinseq --fastq *R1.fastq 
 
+#small ref, faster reporting
+nextflow run nf_wochenende.nf  -with-timeline -with-report --fastq *R1.fastq 
 
 
 

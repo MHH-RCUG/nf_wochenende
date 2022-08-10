@@ -9,10 +9,18 @@
 
  #### Homepage / Documentation Changelog
 
-v0.1.1  
-v0.1.0  
-v0.0.9  
-v0.0.8  
+v0.1.9
+v0.1.8
+v0.1.7
+v0.1.6
+v0.1.5
+v0.1.4
+v0.1.3
+v0.1.2
+v0.1.1  Haybaler args passed from nextflow.config
+v0.1.0  Raspir done, heat trees and heatmaps need to be manually tested as no R server in cluster
+v0.0.9  Raspir integration underway
+v0.0.8  Growth_rate fixed, plotting colours improved
 v0.0.7  Plot (CD) and reporting (mainly Lisa) now fixed. Reporting fails if no data aligned to ref, fair enough.
 v0.0.6  Add new mock reference seq and fast5 mock files for testing
 v0.0.5  Remove get_wochenende.sh script functionality, still need WOCHENENDE_DIR defined in nextflow script for run_Wochenende.py, reporting semi-working, start metagen window filter
@@ -32,7 +40,7 @@ def helpMessage() {
     Usage:
     The typical command for running the pipeline is:
       conda activate nextflow
-      nextflow run run_nf_wochenende.nf  --fasta /path/to/x.fa --fastq /path/x.fastq
+      nextflow run nf_wochenende.nf  --fasta /path/to/x.fa --fastq /path/x.fastq
 
 
     Arguments - all fully defined in script start.sh:
@@ -89,18 +97,60 @@ if (params.help) {
 
 workflow {
 
-    println "Starting run_nf_wochenende.nf"
-    println "Version 0.0.7 by Colin Davenport, Tobias Scheithauer and Lisa Hollstein with many further contributors"
+    println "Starting nf_wochenende.nf"
+    println "Version 0.1.1 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
 
     // File inputs
-    // Read inputs, SE read inputs should be possible
+    // R1 Read inputs, R2 reads are linked in by the process if they exist.
     input_fastq_R1 = Channel.fromPath("*_R1.fastq", checkIfExists: true)
 
     chunksize = Channel.value(1000)
+    println "########### Settings ##############"
+    println "Using reference sequence: " + params.ref
+    println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
+    println "Using this HAYBALER_DIR: " + params.HAYBALER_DIR
+    println "Using this readType setting: " + params.readType
+    println "Using this longread setting: " + params.longread
+    println "Using this aligner setting: " + params.aligner
+    println "Using this mismatches setting: " + params.mismatches
+    println "Using this nextera setting: " + params.nextera
+    println "Using this abra setting: " + params.abra
+    println "Using this mapping_quality setting: " + params.mapping_quality
+    println "Using this no_dup_removal setting: " + params.no_dup_removal
+    println "Using this no_prinseq setting: " + params.no_prinseq
+    println "Using this no_fastqc setting: " + params.no_fastqc
+    println "Using this fastp setting: " + params.fastp
+    println "Using this trim_galore setting: " + params.trim_galore
+    println "########### End settings ##############"
+
+    // Parameters - throw warnings at present
+    if (params.mapping_quality != "") {
+       params.mq = "--" + params.mapping_quality
+    } else {
+       params.mq = ""
+    }
+
+    if (params.no_abra) {
+       params.abra = "--no_abra"
+    } else {
+       params.abra = ""
+    }
+
+    if (params.no_dup_removal) {
+       params.no_duplicate_removal = "--no_duplicate_removal"
+    } else {
+       params.no_duplicate_removal = ""
+    } 
+
+    if (params.no_prinseq) {
+       params.prinseq = "--no_prinseq"
+    } else {
+       params.prinseq = ""
+    }
 
 
     // run processes
-   
+
     // run main Wochenende process
     wochenende(input_fastq_R1)
     
@@ -108,10 +158,11 @@ workflow {
     reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
+    //haybaler(reporting.out.us_csvs.collect().flatten())
     haybaler(reporting.out.us_csvs.collect())
 
     // create heattrees from haybaler output
-    // needs R server
+    // needs R server configured in config.yml
     //heattrees(haybaler.out.haybaler_heattree_csvs)
 
     // create heatmaps from haybaler ouput
@@ -124,17 +175,14 @@ workflow {
     // run growth_rate prediction step
     growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
 
-    // generate alignment stats
-    //bam_stats(wochenende.out)
+    // run raspir steps
+    raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
-    // convert bam to cram format
-    //convert_bam_cram(sort_bam.out)
+    //raspir(raspir_fileprep.out.collect())
+    raspir(raspir_fileprep.out)
     
     // multiqc
     //multiqc(bam_stats.out.collect(), bam_stats.out)
-
-    // metagen window filter - @Lisa - I think this step is covered in plots and or growth rate so might not be needed?
-    // metagen_window(wochenende.out.all, plots.out.window_txt)
 
 
 }
@@ -144,17 +192,19 @@ workflow {
 
 /*
  *  Run wochenende
- *  Parcels the python script into a single Nextflow process
+ *  Parcels the run_Wochenende.py python script into a single Nextflow process
  *  Output - sorted bams for each step, and bam.txt files with read counts per chromosome.
+ *  Terminates on error, since this step provides data for all further steps.
  */
 
 process wochenende {
 
     cpus = 16
 	// If job fails, try again with more memory
-	//memory { 40.GB * task.attempt }
-    memory 40.GB
-	errorStrategy 'terminate'
+	memory { 40.GB * task.attempt }
+    //memory 40.GB
+	//errorStrategy 'terminate'
+    errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
     // TODO - make a singularity container
@@ -182,12 +232,9 @@ process wochenende {
 
     input:
     file fastq
-    //file fastq2
 
 
     output:
-    //file "${prefix}*s.bam"
-    //file "${prefix}*s.bam.bai"
     path "*.bam", emit: bams
     path "*.s.bam", emit: s_bams
     path "*.calmd.bam", emit: calmd_bams
@@ -202,8 +249,7 @@ process wochenende {
     path "*.fastq"
     path "*.bam.txt", emit: bam_txts
     path "*.calmd.bam.txt", emit: calmd_bam_txts
-    path "*", emit: all
-    //path "ref.tmp", emit: ref_tmp
+    path "*.*", emit: all
     
 
     script:
@@ -213,40 +259,11 @@ process wochenende {
     array = fastq.name.toString().split('_R1');
     prefix = array[0]
     fastq_R2 = prefix + "_R2.fastq"
-    println "Derived FASTQ R2 from R1 as: " + fastq_R2
-    println params.ref
-    println params.WOCHENENDE_DIR
-
-    if (params.mapping_quality != "") {
-       params.mq = "--" + params.mapping_quality
-    } else {
-       params.mq = ""
-    }
-
-    if (params.no_abra) {
-       params.abra = "--no_abra"
-    } else {
-       params.abra = ""
-    }
-
-    if (params.no_dup_removal) {
-       params.no_duplicate_removal = "--no_duplicate_removal"
-    } else {
-       params.no_duplicate_removal = ""
-    } 
-
-    if (params.no_prinseq) {
-       params.prinseq = "--no_prinseq"
-    } else {
-       params.prinseq = ""
+    if (params.readType == "PE") {
+        println "Derived FASTQ R2 from R1 as: " + fastq_R2
     }
 
 
-    //export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
-    //export HAYBALER_DIR=${params.HAYBALER_DIR}
-
-    //cp ${params.WOCHENENDE_DIR}/get_wochenende.sh .
-    //bash get_wochenende.sh     
 
     """
     export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
@@ -259,7 +276,12 @@ process wochenende {
     cp -R ${params.WOCHENENDE_DIR}/dependencies/*.pl .
     cp scripts/*.sh .
 
-    ln -s ${launchDir}/$fastq_R2 .
+    if [[ $params.readType == "PE" ]]
+        then
+        echo "readType PE found."
+        echo "Trying to link in R2, the second pair of the paired end reads. Will fail if does not exist (use --readType SE in that case)"
+        ln -s ${launchDir}/$fastq_R2 .
+    fi
     python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
 
     """
@@ -275,8 +297,8 @@ process reporting {
     cpus = 1
 
     conda params.conda_wochenende
-    //errorStrategy 'ignore'
-    errorStrategy 'terminate'
+    errorStrategy 'ignore'
+    //errorStrategy 'terminate'
     
     tag "$name"
     label 'process_medium'
@@ -314,31 +336,40 @@ process haybaler {
     cpus = 1
 
     conda params.conda_haybaler
-	errorStrategy 'ignore'
-    //errorStrategy 'terminate'
+	//errorStrategy 'ignore'
+    errorStrategy 'terminate'
     
     tag "$name"
     label 'process_medium'
 
-    publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
+    publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
 
     input:
     file us_csv
 
     output:
-    path "*haybaler*.csv", emit: haybaler_csvs
-    path "*haybaler.csv", emit: haybaler_heattree_csvs
-    path "haybaler_output"
+    path "haybaler_output/*haybaler*.csv", emit: haybaler_csvs
+    path "haybaler_output/*haybaler.csv", emit: haybaler_heattree_csvs
+    path "haybaler_output/logs"
 
     script:
-    name = us_csv
+    name = "haybaler_input"
 
-    """
+    // full run haybaler moved here to allow easy parameter changes
+    // # Only run for *bam*.csv if files exist in current dir
+    // # Only run for *bam*.txt if files exist in current dir
+    // # Use  --readcount_limit 1 --rpmm_limit 10 for pipeline testing, use nextflow.config
+
+    """/bin/bash
     cp ${params.HAYBALER_DIR}/haybaler.py .
     cp ${params.HAYBALER_DIR}/csv_to_xlsx_converter.py .
     cp ${params.WOCHENENDE_DIR}/haybaler/run_haybaler.sh .
 
-    bash run_haybaler.sh
+    bash run_haybaler.sh ${params.haybaler_readcount_limit} ${params.haybaler_rpmm_limit}
+
+
+
+
     """
 }
 
@@ -354,7 +385,7 @@ process heattrees {
 	errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
-    publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
+    publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
 
     input:
     file heattree_files
@@ -390,7 +421,7 @@ process heatmaps {
 	errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
-    publishDir path: "${params.outdir}/reporting/haybaler_output", mode: params.publish_dir_mode
+    publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
 
     input:
     file heatmap_file
@@ -417,7 +448,7 @@ process heatmaps {
 process plots {
 
     cpus = 1
-	// If job fails, try again with more memory
+	// If job fails, try again with more memory if retry set
 	memory { 8.GB * task.attempt }
 	errorStrategy 'terminate'
     //errorStrategy 'ignore'
@@ -433,7 +464,7 @@ process plots {
     if (params.save_align_intermeds) {
         publishDir path: "${params.outdir}/plots", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith('plots')) "$filename"
+                          if (filename.endsWith('R1')) "$filename"
                           else filename
                     }
     }
@@ -446,7 +477,7 @@ process plots {
 
 
     output:
-    file "plots"
+    path "plots/images/*"
     path "*.calmd_cov_window.txt", emit: window_txt
     
 
@@ -467,7 +498,8 @@ process plots {
     cp ../*_window.txt . 
     cp ../*_window.txt.filt.csv .
     bash runbatch_wochenende_plot.sh >/dev/null 2>&1
-    cd $launchDir
+    
+        
     echo "INFO: Completed Wochenende plot"
 
 
@@ -485,8 +517,8 @@ process growth_rate {
     cpus = 1
 	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
-    //errorStrategy 'ignore'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -513,8 +545,8 @@ process growth_rate {
 
 
     output:
-    file "growth_rate"
-    file "fit_results"
+    //file "growth_rate/*"
+    file "fit_results/*"
 
     script:
     prefix = bam.name.toString().tokenize('.').get(0)
@@ -534,7 +566,6 @@ process growth_rate {
         
     bash run_reproduction_determiner.sh  >/dev/null 2>&1
      
-    
     echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
 
 
@@ -544,110 +575,109 @@ process growth_rate {
 
 
 
-
 /*
- *  Convert BAM to coordinate sorted BAM, make stats, flagstat, idxstats
+ *  Run raspir file preparation 
  */
 
-process sort_bam {
+process raspir_fileprep {
 
     cpus = 8
 	// If job fails, try again with more memory
-	memory { 32.GB * task.attempt }
-	errorStrategy 'retry'
-
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
-
-
-    tag "$name"
-    label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/samtools", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith('.flagstat')) "$filename" 
-                          else if (filename.endsWith('.idxstats')) "$filename" 
-                          else if (filename.endsWith('.stats')) "$filename" 
-                          else filename
-                    }
-    }
-
-
-    input:
-    file bam
-
-
-    output:
-    file "${prefix}.sorted.bam"
-    file "${prefix}.sorted.bam.bai"
-    file "${prefix}.sorted.bam.flagstat"
-    file "${prefix}.sorted.bam.idxstats"
-    file "${prefix}.sorted.bam.stats"
-
-    script:
-    prefix = bam.name.toString().tokenize('.').get(0)
-    name = bam
-
-    """
-    samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -T $name $bam
-    samtools index ${prefix}.sorted.bam
-    samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
-    samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
-    samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
-    """
-}
-
-
-
-/*
- *  make bam stats, flagstat, idxstats
- */
-
-process bam_stats {
-
-    cpus = 1
-	// If job fails, try again with more memory
 	memory { 8.GB * task.attempt }
-	errorStrategy 'retry'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
+    //errorStrategy 'retry'
 
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
-
+    // Use conda env defined in nextflow.config file
+    conda params.conda_haybaler
 
     tag "$name"
     label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/samtools", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith('.flagstat')) "$filename" 
-                          else if (filename.endsWith('.idxstats')) "$filename" 
-                          else if (filename.endsWith('.stats')) "$filename" 
-                          else filename
-                    }
-    }
+    
 
 
     input:
     file bam
     file bai
-    file fastq
-    file bam_txt
-
-
 
     output:
-    file "${prefix}.sorted.bam.flagstat"
-    file "${prefix}.sorted.bam.idxstats"
-    file "${prefix}.sorted.bam.stats"
+    path "*.raspir.csv"
 
     script:
     prefix = bam.name.toString().tokenize('.').get(0)
     name = bam
 
     """
-    samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
-    samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
-    samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
+    cp -R ${params.WOCHENENDE_DIR}/raspir/ .
+
+    echo "INFO: Started raspir analysis"
+    cp raspir/* .
+
+    bash run_SLURM_file_prep.sh $bam >/dev/null 2>&1
+         
+    echo "INFO: Completed raspir module"
+
     """
+  
 }
+
+
+/*
+ *  Run raspir
+ */
+
+process raspir {
+
+    cpus = 1
+	// If job fails, try again with more memory
+	memory { 8.GB * task.attempt }
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
+    //errorStrategy 'retry'
+
+    // Use conda env defined in nextflow.config file
+    conda params.conda_haybaler
+
+    tag "$name"
+    label 'process_medium'
+    
+       
+    if (params.save_align_intermeds) {
+        publishDir path: "${params.outdir}/raspir", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith('*.csv')) "$filename"
+                          else filename
+                    }
+    }
+    
+
+
+    input:
+    file input_csv
+    //each file input_csv
+
+    output:
+    path "*.csv"
+
+    script:
+    prefix = input_csv.name.toString().tokenize('.').get(0)
+    name = input_csv
+
+    """
+    cp -R ${params.WOCHENENDE_DIR}/raspir/ .
+    cp -R ${params.WOCHENENDE_DIR}/scripts/ .
+    
+    echo "INFO: Started raspir analysis"
+    cp raspir/* .
+
+    python raspir.py $input_csv ${prefix}.csv >/dev/null 2>&1
+    echo "INFO: Completed raspir"
+
+    """
+  
+}
+
+
 
 
 /*
@@ -752,27 +782,3 @@ process multiqc {
 
 }
 
-
-process metagen_window {
-    cpus = 1
-
-    conda params.conda_wochenende
-
-    publishDir path: "${params.outdir}", mode: params.publish_dir_mode
-
-    input:
-    file all
-    file window_txt
-
-    output:
-    path "*window.txt.filt.csv", emit: window_filt
-    path "*window.txt.filt.sort.csv", emit: window_sort
-
-    script:
-
-    """
-    cp ${params.WOCHENENDE_DIR}/scripts/runbatch_metagen_window_filter.sh .
-    bash runbatch_metagen_window_filter.sh
-    """
-
-}

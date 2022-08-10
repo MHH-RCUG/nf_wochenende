@@ -2,9 +2,10 @@
 # Automated postprocessing of results from the Wochenende pipeline, with wochenende reporting and haybaler.
 # Authors: Colin Davenport, Sophia Poertner
 
-version="0.36, Jan 2022"
+version="DEPRECATED July 2022 - replaced by run_wochenende.nf, will be deleted soon. 0.37, August 2022."
 
 #Changelog
+#0.37 - DEPRECATED
 #0.36 - add random number to allow concurrent independent fileprep jobs
 #0.35 - update raspir and attempt raspir samtools depth parallel speedup
 #0.34 - resolve bug with ordering of conda envs with -a option (thanks @irosenboom, @vangreuj )
