@@ -16,7 +16,7 @@ v0.1.6
 v0.1.5
 v0.1.4
 v0.1.3
-v0.1.2
+v0.1.2  All args set in nextflow.config, reassigned for Python in nf_wochenende.nf
 v0.1.1  Haybaler args passed from nextflow.config
 v0.1.0  Raspir done, heat trees and heatmaps need to be manually tested as no R server in cluster
 v0.0.9  Raspir integration underway
@@ -133,30 +133,57 @@ workflow {
     no_fastqc = true            // Do not run fastqc
     fastp = false               // Use fastp trimming tool (short reads)
     trim_galore = false         // Use trim_galore trimmer (short reads)
+    //  usage: run_Wochenende.py [-h] [--aligner {bwamem,minimap2short,minimap2long,ngmlr}] [--readType {PE,SE}] [--ref REF] [--threads THREADS] [--fastp] [--nextera] [--trim_galore] [--debug] [--longread]
+    //                       [--no_duplicate_removal] [--no_prinseq] [--no_fastqc] [--no_abra] [--mq20] [--mq30] [--remove_mismatching REMOVE_MISMATCHING] [--force_restart]
+    //                       fastq
 
 
     if (params.mapping_quality != "") {
-       params.mq = "--" + params.mapping_quality
+       params.py_mq = "--" + params.mapping_quality
     } else {
-       params.mq = ""
+       params.py_mq = ""
     }
 
     if (params.no_abra) {
-       params.abra = "--no_abra"
+       params.py_abra = "--no_abra"
     } else {
-       params.abra = ""
+       params.py_abra = ""
     }
 
     if (params.no_dup_removal) {
-       params.no_duplicate_removal = "--no_duplicate_removal"
+       params.py_no_dup_removal = "--no_duplicate_removal"
     } else {
-       params.no_duplicate_removal = ""
+       params.py_no_dup_removal = ""
     } 
 
     if (params.no_prinseq) {
-       params.prinseq = "--no_prinseq"
+       params.py_prinseq = "--no_prinseq"
     } else {
-       params.prinseq = ""
+       params.py_prinseq = ""
+    }
+
+    if (params.longread) {
+       params.py_longread = "--longread"
+    } else {
+       params.py_longread = ""
+    }
+
+    if (params.nextera) {
+       params.py_nextera = "--nextera"
+    } else {
+       params.py_nextera = ""
+    }
+
+    if (params.trim_galore) {
+       params.py_trim_galore = "--trim_galore"
+    } else {
+       params.py_trim_galore = ""
+    }
+
+    if (params.no_fastqc) {
+       params.py_fastqc = "--no_fastqc"
+    } else {
+       params.py_fastqc = ""
     }
 
 
@@ -293,7 +320,7 @@ process wochenende {
         echo "Trying to link in R2, the second pair of the paired end reads. Will fail if does not exist (use --readType SE in that case)"
         ln -s ${launchDir}/$fastq_R2 .
     fi
-    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner $params.abra $params.mq --remove_mismatching $params.mismatches --readType $params.readType $params.prinseq $params.no_duplicate_removal --force_restart $fastq
+    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner --remove_mismatching $params.mismatches --readType $params.readType $params.py_mq $params.py_abra $params.py_prinseq $params.py_no_dup_removal $params.py_longread $params.py_nextera $params.py_fastp $params.py_trim_galore --force_restart $fastq
 
     """
 
