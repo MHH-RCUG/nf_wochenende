@@ -144,7 +144,7 @@ workflow {
        params.py_mq = ""
     }
 
-    if (params.no_abra) {
+    if (params.abra) {
        params.py_abra = "--no_abra"
     } else {
        params.py_abra = ""
