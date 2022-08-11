@@ -3,12 +3,14 @@ A reporting script for the results of the Wochenende Pipeline
 Author: Tobias Scheithauer, August 2018
 Author: Erik Wessels, October 2019
 Author: Fabian Charly Friedrich, February 2020
-Author: Colin Davenport
+Author: Colin Davenport 2019-2022
 Author: Sophia Poertner
 
 TODOs
 
 Changelog
+
+1.6.0 biopython still needed for fasta reading
 1.5.4 new references added
 1.5.3 docs and comments improved
 1.5.2 lint with tool black
@@ -30,7 +32,7 @@ import pandas as pd
 import click
 
 
-version = "1.5.4"
+version = "1.6.0"
 
 ###################################
 # functions
