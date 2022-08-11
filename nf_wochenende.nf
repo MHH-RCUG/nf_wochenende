@@ -187,6 +187,25 @@ workflow {
     }
 
 
+    println "########### Settings PY params ##############"
+    println "Using reference sequence: " + params.ref
+    println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
+    println "Using this HAYBALER_DIR: " + params.HAYBALER_DIR
+    println "Using this readType setting: " + params.readType
+    println "Using this longread setting: " + params.py_longread
+    println "Using this aligner setting: " + params.aligner
+    println "Using this mismatches setting: " + params.mismatches
+    println "Using this nextera setting: " + params.py_nextera
+    println "Using this abra setting: " + params.py_abra
+    println "Using this mapping_quality setting: " + params.py_mq
+    println "Using this no_dup_removal setting: " + params.py_no_dup_removal
+    println "Using this no_prinseq setting: " + params.py_no_prinseq
+    println "Using this no_fastqc setting: " + params.py_no_fastqc
+    println "Using this fastp setting: " + params.py_fastp
+    println "Using this trim_galore setting: " + params.py_trim_galore
+    println "########### End settings ##############"
+
+
     // run processes
 
     // run main Wochenende process
