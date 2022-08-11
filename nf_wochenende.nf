@@ -186,6 +186,30 @@ workflow {
        params.py_fastqc = ""
     }
 
+    if (params.fastp) {
+       params.py_fastp = "--fastp"
+    } else {
+       params.py_fastp = ""
+    }
+
+    println "########### Settings PY params ##############"
+    println "Using reference sequence: " + params.ref
+    println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
+    println "Using this HAYBALER_DIR: " + params.HAYBALER_DIR
+    println "Using this readType setting: " + params.readType
+    println "Using this longread setting: " + params.py_longread
+    println "Using this aligner setting: " + params.aligner
+    println "Using this mismatches setting: " + params.mismatches
+    println "Using this nextera setting: " + params.py_nextera
+    println "Using this abra setting: " + params.py_abra
+    println "Using this mapping_quality setting: " + params.py_mq
+    println "Using this no_dup_removal setting: " + params.py_no_dup_removal
+    println "Using this no_prinseq setting: " + params.py_prinseq
+    println "Using this no_fastqc setting: " + params.py_fastqc
+    println "Using this fastp setting: " + params.py_fastp
+    println "Using this trim_galore setting: " + params.py_trim_galore
+    println "########### End settings ##############"
+
 
     // run processes
 
@@ -320,7 +344,7 @@ process wochenende {
         echo "Trying to link in R2, the second pair of the paired end reads. Will fail if does not exist (use --readType SE in that case)"
         ln -s ${launchDir}/$fastq_R2 .
     fi
-    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner --remove_mismatching $params.mismatches --readType $params.readType $params.py_mq $params.py_abra $params.py_prinseq $params.py_no_dup_removal $params.py_longread $params.py_nextera $params.py_fastp $params.py_trim_galore --force_restart $fastq
+    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner --remove_mismatching $params.mismatches --readType $params.readType $params.py_mq $params.py_abra $params.py_prinseq $params.py_no_dup_removal $params.py_longread $params.py_fastqc $params.py_nextera $params.py_fastp $params.py_trim_galore --force_restart $fastq
 
     """
 
