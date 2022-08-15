@@ -7,9 +7,6 @@
 # Usage: bash run_heattrees.sh
 # Adjustments for nf_wochenende by Lisa Hollstein
 
-#Args
-rscript_bin=$1
-
 
 set_ulimits () {
         echo "INFO: trying to set ulimits higher from 8GB cstack to 32GB cstack"
@@ -39,6 +36,7 @@ prepare_files () {
 
 
 create_heattrees () {
+  rscript_bin="/usr/bin/Rscript"
   echo "INFO: Starting batch heat-tree creation"
     if [[ ! -f $rscript_bin ]]
             then

@@ -109,7 +109,6 @@ workflow {
     println "Using reference sequence: " + params.ref
     println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
     println "Using this HAYBALER_DIR: " + params.HAYBALER_DIR
-    println "Using this rscript_bin: " + params.rscript_bin
     println "Using this readType setting: " + params.readType
     println "Using this longread setting: " + params.longread
     println "Using this aligner setting: " + params.aligner
@@ -221,27 +220,28 @@ workflow {
     reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
+    //haybaler(reporting.out.us_csvs.collect().flatten())
     haybaler(reporting.out.us_csvs.collect())
 
     // create heattrees from haybaler output
     // needs R server configured in config.yml
-    heattrees(haybaler.out.haybaler_heattree_csvs)
+    //heattrees(haybaler.out.haybaler_heattree_csvs)
 
     // create heatmaps from haybaler ouput
     // needs R server
-    heatmaps(haybaler.out.haybaler_csvs.flatten())
+    //heatmaps(haybaler.out.haybaler_csvs.flatten())
 
     // run plots on the calmd_bams only
-    //plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
     // run growth_rate prediction step
-    //growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+    growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
 
     // run raspir steps
-    //raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
     //raspir(raspir_fileprep.out.collect())
-    //raspir(raspir_fileprep.out)
+    raspir(raspir_fileprep.out)
     
     // multiqc
     //multiqc(bam_stats.out.collect(), bam_stats.out)
@@ -395,7 +395,6 @@ process reporting {
 
 process haybaler {
 
-
     cpus = 1
 
     conda params.conda_haybaler
@@ -442,9 +441,6 @@ process haybaler {
  */
 
 process heattrees {
-
-    executor = "local"
-
     cpus = 1
 
     conda params.conda_haybaler
@@ -471,7 +467,7 @@ process heattrees {
     cp ${params.WOCHENENDE_DIR}/haybaler/run_heattrees.sh .
     cp ${params.HAYBALER_DIR}/create_heattrees.R .
 
-    bash run_heattrees.sh ${params.rscript_bin}
+    bash run_heattrees.sh
     """
 }
 
@@ -481,11 +477,9 @@ process heattrees {
  */
 
 process heatmaps {
-
-    executor = "local"
-
     cpus = 1
 
+    conda params.conda_haybaler
 	errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
@@ -501,10 +495,10 @@ process heatmaps {
     script:
 
     """
-    cp ${params.WOCHENENDE_DIR}/haybaler/runbatch_heatmaps.sh .
+    cp ${params.WOCHENENDE_DIR}/runbatch_heatmaps.sh .
     cp ${params.HAYBALER_DIR}/create_heatmap.R .
 
-    bash runbatch_heatmaps.sh ${params.rscript_bin}
+    bash runbatch_heatmaps.sh
     """
 }
 
