@@ -9,7 +9,7 @@
 
 prepare_files () {
   echo "INFO: Preparing files for R heatmap creation"
-  for infile in $(ls *haybaler.csv *haybaler_short.csv)
+  for infile in $(ls *haybaler.csv *haybaler_short.csv 2>/dev/null)
         do
         echo "Running on " $infile
 
@@ -34,7 +34,7 @@ create_heatmaps () {
 
 # check for rscript, exit if unavailable
 # get rscript_bin from config_yaml. Run setup.sh and restart session
-# rscript_bin="/usr/bin/Rscript"
+rscript_bin="/usr/bin/Rscript"
 if [[ ! -f $rscript_bin ]]
         then
         echo "INFO: Rscript binary not found, aborting. Could not find Rscript here, is R installed? " $rscript_bin
@@ -52,7 +52,7 @@ done
 }
 
 ## HEATMAP CREATION ##
-
+conda deactivate
 count_haybaler_csv=`ls -1 *haybaler.csv *haybaler_short.csv 2>/dev/null | wc -l`
 if [[ $count_haybaler_csv != 0 ]]
     then

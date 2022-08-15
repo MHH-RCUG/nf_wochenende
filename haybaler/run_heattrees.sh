@@ -36,6 +36,7 @@ prepare_files () {
 
 
 create_heattrees () {
+  rscript_bin="/usr/bin/Rscript"
   echo "INFO: Starting batch heat-tree creation"
     if [[ ! -f $rscript_bin ]]
             then
