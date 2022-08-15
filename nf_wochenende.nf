@@ -484,7 +484,6 @@ process heatmaps {
 
     executor = 'local'
 
-    conda params.conda_haybaler
 	errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
