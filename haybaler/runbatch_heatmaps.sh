@@ -5,6 +5,9 @@
 # exclude GC, ref length, any host chr etc (all distort heatmaps)
 # Sophia Poertner, Colin Davenport, 2020-2021
 
+# Args
+rscript_bin=$1
+
 ## FUNCTIONS ##
 
 prepare_files () {
@@ -33,8 +36,6 @@ create_heatmaps () {
   echo "INFO: Starting batch heatmap creation"
 
 # check for rscript, exit if unavailable
-# get rscript_bin from config_yaml. Run setup.sh and restart session
-rscript_bin="/usr/bin/Rscript"
 if [[ ! -f $rscript_bin ]]
         then
         echo "INFO: Rscript binary not found, aborting. Could not find Rscript here, is R installed? " $rscript_bin
