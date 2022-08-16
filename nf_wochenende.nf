@@ -98,7 +98,7 @@ if (params.help) {
 workflow {
 
     println "Starting nf_wochenende.nf"
-    println "Version 0.1.1 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
+    println "Version 0.1.2 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
 
     // File inputs
     // R1 Read inputs, R2 reads are linked in by the process if they exist.
