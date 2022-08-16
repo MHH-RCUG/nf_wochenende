@@ -109,6 +109,7 @@ workflow {
     println "Using reference sequence: " + params.ref
     println "Using this WOCHENENDE_DIR: " + params.WOCHENENDE_DIR
     println "Using this HAYBALER_DIR: " + params.HAYBALER_DIR
+    println "Using this rscript_bin: " + params.rscript_bin
     println "Using this readType setting: " + params.readType
     println "Using this longread setting: " + params.longread
     println "Using this aligner setting: " + params.aligner
@@ -443,6 +444,8 @@ process haybaler {
 process heattrees {
     cpus = 1
 
+    executor = 'local'
+
     conda params.conda_haybaler
 	errorStrategy 'ignore'
     //errorStrategy 'terminate'
@@ -467,7 +470,7 @@ process heattrees {
     cp ${params.WOCHENENDE_DIR}/haybaler/run_heattrees.sh .
     cp ${params.HAYBALER_DIR}/create_heattrees.R .
 
-    bash run_heattrees.sh
+    bash run_heattrees.sh ${params.rscript_bin}
     """
 }
 
@@ -479,7 +482,8 @@ process heattrees {
 process heatmaps {
     cpus = 1
 
-    conda params.conda_haybaler
+    executor = 'local'
+
 	errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
@@ -495,10 +499,10 @@ process heatmaps {
     script:
 
     """
-    cp ${params.WOCHENENDE_DIR}/runbatch_heatmaps.sh .
+    cp ${params.WOCHENENDE_DIR}/haybaler/runbatch_heatmaps.sh .
     cp ${params.HAYBALER_DIR}/create_heatmap.R .
 
-    bash runbatch_heatmaps.sh
+    bash runbatch_heatmaps.sh ${params.rscript_bin}
     """
 }
 
