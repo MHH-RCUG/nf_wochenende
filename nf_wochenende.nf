@@ -474,7 +474,7 @@ process heattrees {
 
 
 /*
- * Run Heatmaps
+ * Create Heatmaps with R packages
  */
 
 process heatmaps {
@@ -506,7 +506,7 @@ process heatmaps {
 
 
 /*
- *  Run plots
+ *  Create plots per microbial genome using python 
  */
 
 process plots {
@@ -573,7 +573,7 @@ process plots {
 
 
 /*
- *  Run growth rate
+ *  Run growth rate analysis scripts
  */
 
 process growth_rate {
