@@ -15,7 +15,7 @@ v0.1.7
 v0.1.6
 v0.1.5
 v0.1.4
-v0.1.3
+v0.1.3  Solve growth_rate folder output problems with file
 v0.1.2  All args set in nextflow.config, reassigned for Python in nf_wochenende.nf
 v0.1.1  Haybaler args passed from nextflow.config
 v0.1.0  Raspir done, heat trees and heatmaps need to be manually tested as no R server in cluster
@@ -98,7 +98,7 @@ if (params.help) {
 workflow {
 
     println "Starting nf_wochenende.nf"
-    println "Version 0.1.2 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
+    println "Version 0.1.3 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
 
     // File inputs
     // R1 Read inputs, R2 reads are linked in by the process if they exist.
@@ -224,14 +224,6 @@ workflow {
     //haybaler(reporting.out.us_csvs.collect().flatten())
     haybaler(reporting.out.us_csvs.collect())
 
-    // create heattrees from haybaler output
-    // needs R server configured in config.yml
-    //heattrees(haybaler.out.haybaler_heattree_csvs)
-
-    // create heatmaps from haybaler ouput
-    // needs R server
-    //heatmaps(haybaler.out.haybaler_csvs.flatten())
-
     // run plots on the calmd_bams only
     plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
@@ -241,12 +233,18 @@ workflow {
     // run raspir steps
     raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
-    //raspir(raspir_fileprep.out.collect())
     raspir(raspir_fileprep.out)
     
     // multiqc
-    //multiqc(bam_stats.out.collect(), bam_stats.out)
+    multiqc(wochenende.out.collect())
 
+    // create heattrees from haybaler output
+    // needs R server configured in config.yml
+    //heattrees(haybaler.out.haybaler_heattree_csvs)
+
+    // create heatmaps from haybaler ouput
+    // needs R server
+    //heatmaps(haybaler.out.haybaler_csvs.flatten())
 
 }
 
