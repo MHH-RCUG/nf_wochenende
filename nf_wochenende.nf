@@ -582,7 +582,7 @@ process growth_rate {
 
     cpus = 1
 	// If job fails, try again with more memory
-	memory { 8.GB * task.attempt }
+	memory { 32.GB * task.attempt }
 	//errorStrategy 'terminate'
     errorStrategy 'ignore'
     //errorStrategy 'retry'
