@@ -597,7 +597,8 @@ process growth_rate {
     if (params.save_align_intermeds) {
         publishDir path: "${params.outdir}/growth_rate", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith('fit_results')) "$filename"
+                          //if (filename.endsWith('fit_results')) "$filename"
+                          if (filename.endsWith('.csv')) "$filename"
                           else filename
                     }
     }
@@ -612,7 +613,7 @@ process growth_rate {
 
     output:
     //file "growth_rate/*"
-    file "fit_results/*"
+    file "fit_results/**.csv"
 
     script:
     prefix = bam.name.toString().tokenize('.').get(0)
