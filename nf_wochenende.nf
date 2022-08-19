@@ -221,7 +221,6 @@ workflow {
     reporting(wochenende.out.calmd_bam_txts.flatten())
 
     // run haybaler
-    //haybaler(reporting.out.us_csvs.collect().flatten())
     haybaler(reporting.out.us_csvs.collect())
 
     // run plots on the calmd_bams only
