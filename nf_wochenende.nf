@@ -248,7 +248,7 @@ workflow {
     
     if (params.stage_multiqc) {
         // multiqc
-        //multiqc(wochenende.out.collect())
+        multiqc(wochenende.out.calmd_bams.collect(), wochenende.out.calmd_bam_bais.collect())
     }
 
     if (params.stage_heattrees) {
@@ -835,15 +835,19 @@ process multiqc {
         publishDir path: "${params.outdir}/multiqc", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith('.html')) "$filename"
+                          else if (filename.endsWith('.idxstats')) "$filename"
+                          else if (filename.endsWith('.stats')) "$filename"
                           else filename
                     }
     }
 
     input:
-    path multiqc_files
-    file flagstat
-    file idxstats
-    file stats
+    //path multiqc_files
+    //file flagstat
+    //file idxstats
+    //file stats
+    file bam
+    file bai
 
     output:
     path "*multiqc_report.html", emit: report
@@ -858,6 +862,9 @@ process multiqc {
     name = "All stats files"
     
     """
+    samtools stats -r ${params.ref} ${bam}
+    samtools flagstat ${bam} > ${bam}.flagstat
+    samtools idxstats ${bam} > ${bam}.idxstats
     multiqc -f .
     
     """
