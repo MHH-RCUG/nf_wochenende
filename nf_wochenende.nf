@@ -15,7 +15,7 @@ v0.1.7
 v0.1.6
 v0.1.5
 v0.1.4
-v0.1.3  Solve growth_rate folder output problems with file
+v0.1.3  Solve growth_rate folder output problems by changing to files
 v0.1.2  All args set in nextflow.config, reassigned for Python in nf_wochenende.nf
 v0.1.1  Haybaler args passed from nextflow.config
 v0.1.0  Raspir done, heat trees and heatmaps need to be manually tested as no R server in cluster
@@ -217,33 +217,51 @@ workflow {
     // run main Wochenende process
     wochenende(input_fastq_R1)
     
-    // run reporting
-    reporting(wochenende.out.calmd_bam_txts.flatten())
+    if (params.stage_reporting {
+        // run reporting
+        reporting(wochenende.out.calmd_bam_txts.flatten())
+    }
 
-    // run haybaler
-    haybaler(reporting.out.us_csvs.collect())
+    if (params.stage_haybaler {
+        // run haybaler
+        haybaler(reporting.out.us_csvs.collect())
+    }
 
-    // run plots on the calmd_bams only
-    plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    if (params.stage_plots {
+        // run plots on the calmd_bams only
+        plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    }
 
-    // run growth_rate prediction step
-    growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
-
-    // run raspir steps
-    raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
-
-    raspir(raspir_fileprep.out)
+    if (params.stage_growth_rate {
+        // run growth_rate prediction step
+        growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+    }
     
-    // multiqc
-    multiqc(wochenende.out.collect())
+    if (params.stage_raspir {
+        // run raspir steps
+        raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    }
 
-    // create heattrees from haybaler output
-    // needs R server configured in config.yml
-    //heattrees(haybaler.out.haybaler_heattree_csvs)
+    if (params.stage_raspir {
+        raspir(raspir_fileprep.out)
+    }
+    
+    if (params.stage_multiqc {
+        // multiqc
+        multiqc(wochenende.out.collect())
+    }
 
-    // create heatmaps from haybaler ouput
-    // needs R server
-    //heatmaps(haybaler.out.haybaler_csvs.flatten())
+    if (params.stage_heattrees {
+        // create heattrees from haybaler output
+        // needs R server configured in config.yml
+        heattrees(haybaler.out.haybaler_heattree_csvs)
+    }
+
+    if (params.stage_heatmaps {
+        // create heatmaps from haybaler ouput
+        // needs R server
+        heatmaps(haybaler.out.haybaler_csvs.flatten())
+    }
 
 }
 
