@@ -862,7 +862,7 @@ process multiqc {
     name = "All stats files"
     
     """
-    samtools stats -r ${params.ref} ${bam}
+    samtools stats -r ${params.ref} ${bam} > ${bam}.stats
     samtools flagstat ${bam} > ${bam}.flagstat
     samtools idxstats ${bam} > ${bam}.idxstats
     multiqc -f .
