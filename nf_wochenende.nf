@@ -824,7 +824,8 @@ process multiqc {
     cpus = 1
 	// If job fails, try again with more memory
 	memory { 4.GB * task.attempt }
-	errorStrategy 'retry'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
 
     // TODO - singularity 
     conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
