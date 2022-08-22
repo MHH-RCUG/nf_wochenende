@@ -217,47 +217,47 @@ workflow {
     // run main Wochenende process
     wochenende(input_fastq_R1)
     
-    if (params.stage_reporting {
+    if (params.stage_reporting) {
         // run reporting
         reporting(wochenende.out.calmd_bam_txts.flatten())
     }
 
-    if (params.stage_haybaler {
+    if (params.stage_haybaler) {
         // run haybaler
         haybaler(reporting.out.us_csvs.collect())
     }
 
-    if (params.stage_plots {
+    if (params.stage_plots) {
         // run plots on the calmd_bams only
         plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
     }
 
-    if (params.stage_growth_rate {
+    if (params.stage_growth_rate) {
         // run growth_rate prediction step
         growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
     }
     
-    if (params.stage_raspir {
+    if (params.stage_raspir) {
         // run raspir steps
         raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
     }
 
-    if (params.stage_raspir {
+    if (params.stage_raspir) {
         raspir(raspir_fileprep.out)
     }
     
-    if (params.stage_multiqc {
+    if (params.stage_multiqc) {
         // multiqc
         multiqc(wochenende.out.collect())
     }
 
-    if (params.stage_heattrees {
+    if (params.stage_heattrees) {
         // create heattrees from haybaler output
         // needs R server configured in config.yml
         heattrees(haybaler.out.haybaler_heattree_csvs)
     }
 
-    if (params.stage_heatmaps {
+    if (params.stage_heatmaps) {
         // create heatmaps from haybaler ouput
         // needs R server
         heatmaps(haybaler.out.haybaler_csvs.flatten())
