@@ -1438,7 +1438,6 @@ def main(args, sys_argv):
                     "runTMTrimming", runTMTrimming, currentFile, True, adapter_truseq
                 )
 
-        # if not args.longread:
         # currentFile = runFunc("runEATrimming", runEATrimming, currentFile, True)
         currentFile = runFunc(
             "runAligner",
@@ -1470,7 +1469,6 @@ def main(args, sys_argv):
             args.readType,
         )
 
-        #        if args.remove_mismatching and not args.longread:
         if args.remove_mismatching:
             # currentFile = runFunc("runBamtools", runBamtools, currentFile, True)
             currentFile = runFunc(
@@ -1486,7 +1484,8 @@ def main(args, sys_argv):
             # currentFile = runFunc("runBAMindex12", runBAMindex, currentFile, False)
             # currentFile = runFunc("runIDXstats12", runIDXstats, currentFile, False)
 
-        if not args.no_duplicate_removal and not args.longread:
+        #if not args.no_duplicate_removal and not args.longread:
+        if not args.no_duplicate_removal:
             # currentFile = runFunc("markDups", markDups, currentFile, True)
             currentFile = runFunc(
                 "markDupsSamtools", markDupsSamtools, currentFile, True
