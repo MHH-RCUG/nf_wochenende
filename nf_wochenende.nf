@@ -248,7 +248,7 @@ workflow {
     
     if (params.stage_multiqc) {
         // multiqc
-        multiqc(wochenende.out.calmd_bams.collect(), wochenende.out.calmd_bam_bais.collect())
+        //multiqc(wochenende.out.calmd_bams.collect(), wochenende.out.calmd_bam_bais.collect())
     }
 
     if (params.stage_heattrees) {
