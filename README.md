@@ -43,13 +43,6 @@ Wochenende means weekend in German. The original developer, Tobias, called the p
 
 Please view and cite the Wochenende preprint at https://www.biorxiv.org/content/10.1101/2022.03.18.484377v2
 
-## Nextflow version authors
-
-* Colin Davenport
-* Lisa Hollstein
-* Ilona Rosenboom
-
-
 
 ## Installation
 
@@ -73,3 +66,36 @@ Output
 ![flowchart](https://user-images.githubusercontent.com/6094884/180654822-5d6d3129-e50a-485b-9fc8-52def87cb4b9.png)
 
 
+## Tools used
+
+- [Alignerboost](https://github.com/Grice-Lab/AlignerBoost). GPL3, in dependencies folder.
+- [ABRA2](https://github.com/mozack/abra2)
+- [bamtools](https://github.com/pezmaster31/bamtools)
+- [BWA](https://github.com/lh3/bwa)
+- [ea-utils](https://github.com/ExpressionAnalysis/ea-utils)
+- [fastp](https://github.com/OpenGene/fastp)
+- [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- [FastUniq](https://sourceforge.net/projects/fastuniq/)
+- [Minimap2](https://github.com/lh3/minimap2)
+- [NGMLR](https://github.com/philres/ngmlr)
+- [perldup](https://github.com/richardmleggett/scripts/blob/master/remove_pcr_duplicates.pl) Already copied to dependencies folder with permission. Developed by [Richard Leggett](https://github.com/richardmleggett).
+- [PRINSEQ](http://prinseq.sourceforge.net/)
+- [sambamba](https://github.com/biod/sambamba)
+- [samtools](https://github.com/samtools/samtools)
+- [trim_galore](https://github.com/FelixKrueger/TrimGalore)
+- [trimmomatic](https://github.com/timflutre/trimmomatic)
+
+Postprocessing
+- [Haybaler](https://github.com/MHH-RCUG/haybaler)
+
+Optional extras
+- [growth rate](https://github.com/MHH-RCUG/Wochenende/tree/master/growth_rate)
+- [raspir](https://github.com/mmpust/raspir)
+
+
+
+## Nextflow version authors
+
+* Colin Davenport
+* Lisa Hollstein
+* Ilona Rosenboom
