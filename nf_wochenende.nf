@@ -223,6 +223,14 @@ workflow {
     // run haybaler
     haybaler(reporting.out.us_csvs.collect())
 
+    // create heattrees from haybaler output
+    // needs R server 
+    heattrees(haybaler.out.haybaler_heattree_csvs)
+
+    // create heatmaps from haybaler ouput
+    // needs R server
+    heatmaps(haybaler.out.haybaler_csvs.flatten())
+    
     // run plots on the calmd_bams only
     plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
@@ -235,8 +243,9 @@ workflow {
     raspir(raspir_fileprep.out)
     
     // multiqc
-    multiqc(wochenende.out.collect())
 
+    multiqc(wochenende.out.collect())
+    
     // create heattrees from haybaler output
     // needs R server configured in config.yml
     //heattrees(haybaler.out.haybaler_heattree_csvs)
