@@ -246,6 +246,7 @@ workflow {
         raspir(raspir_fileprep.out)
     }
     
+
     if (params.stage_multiqc) {
         // multiqc
         //multiqc(wochenende.out.calmd_bams.collect(), wochenende.out.calmd_bam_bais.collect())
