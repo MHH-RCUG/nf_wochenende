@@ -15,7 +15,7 @@ v0.1.7
 v0.1.6
 v0.1.5
 v0.1.4
-v0.1.3
+v0.1.3  Solve growth_rate folder output problems with file
 v0.1.2  All args set in nextflow.config, reassigned for Python in nf_wochenende.nf
 v0.1.1  Haybaler args passed from nextflow.config
 v0.1.0  Raspir done, heat trees and heatmaps need to be manually tested as no R server in cluster
@@ -98,7 +98,7 @@ if (params.help) {
 workflow {
 
     println "Starting nf_wochenende.nf"
-    println "Version 0.1.1 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
+    println "Version 0.1.3 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
 
     // File inputs
     // R1 Read inputs, R2 reads are linked in by the process if they exist.
@@ -230,7 +230,7 @@ workflow {
     // create heatmaps from haybaler ouput
     // needs R server
     heatmaps(haybaler.out.haybaler_csvs.flatten())
-
+    
     // run plots on the calmd_bams only
     plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
@@ -240,12 +240,19 @@ workflow {
     // run raspir steps
     raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
 
-    //raspir(raspir_fileprep.out.collect())
     raspir(raspir_fileprep.out)
     
     // multiqc
-    multiqc(bam_stats.out.collect(), bam_stats.out)
 
+    multiqc(wochenende.out.collect())
+    
+    // create heattrees from haybaler output
+    // needs R server configured in config.yml
+    //heattrees(haybaler.out.haybaler_heattree_csvs)
+
+    // create heatmaps from haybaler ouput
+    // needs R server
+    //heatmaps(haybaler.out.haybaler_csvs.flatten())
 
 }
 
@@ -475,7 +482,7 @@ process heattrees {
 
 
 /*
- * Run Heatmaps
+ * Create Heatmaps with R packages
  */
 
 process heatmaps {
@@ -507,7 +514,7 @@ process heatmaps {
 
 
 /*
- *  Run plots
+ *  Create plots per microbial genome using python 
  */
 
 process plots {
@@ -574,14 +581,14 @@ process plots {
 
 
 /*
- *  Run growth rate
+ *  Run growth rate analysis scripts
  */
 
 process growth_rate {
 
     cpus = 1
 	// If job fails, try again with more memory
-	memory { 8.GB * task.attempt }
+	memory { 32.GB * task.attempt }
 	//errorStrategy 'terminate'
     errorStrategy 'ignore'
     //errorStrategy 'retry'
@@ -596,7 +603,8 @@ process growth_rate {
     if (params.save_align_intermeds) {
         publishDir path: "${params.outdir}/growth_rate", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith('fit_results')) "$filename"
+                          //if (filename.endsWith('fit_results')) "$filename"
+                          if (filename.endsWith('.csv')) "$filename"
                           else filename
                     }
     }
@@ -611,7 +619,7 @@ process growth_rate {
 
     output:
     //file "growth_rate/*"
-    file "fit_results/*"
+    file "fit_results/**.csv"
 
     script:
     prefix = bam.name.toString().tokenize('.').get(0)
