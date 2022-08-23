@@ -314,18 +314,18 @@ process wochenende {
 
 
     output:
-    path "*.bam", emit: bams
+    //path "*.bam", emit: bams
     path "*.s.bam", emit: s_bams
     path "*.calmd.bam", emit: calmd_bams
     path "*.mm.bam", emit: mm_bams
     path "*.dup.bam", emit: dup_bams
-    path "*.bam.bai", emit: bam_bais
+    //path "*.bam.bai", emit: bam_bais
     path "*.s.bam.bai", emit: s_bam_bais
     path "*.calmd.bam.bai", emit: calmd_bam_bais
     path "*.mm.bam.bai", emit: mm_bam_bais
     path "*.dup.bam.bai", emit: dup_bam_bais
-    path "*.bai"
-    path "*.fastq"
+    //path "*.bai"
+    //path "*.fastq"
     path "*.bam.txt", emit: bam_txts
     path "*.calmd.bam.txt", emit: calmd_bam_txts
     //path "*.*", emit: all       // lets avoid this, else we get scripts in the output dir
