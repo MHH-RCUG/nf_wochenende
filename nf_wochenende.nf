@@ -372,7 +372,7 @@ process wochenende {
  */
 
 process reporting {
-    cpus = 1
+    cpus = 8
 
     conda params.conda_wochenende
     errorStrategy 'ignore'
@@ -411,7 +411,7 @@ process reporting {
 
 process haybaler {
 
-    cpus = 1
+    cpus = 16
 
     conda params.conda_haybaler
 	//errorStrategy 'ignore'
@@ -457,7 +457,7 @@ process haybaler {
  */
 
 process heattrees {
-    cpus = 1
+    cpus = 16
 
     executor = 'local'
 
