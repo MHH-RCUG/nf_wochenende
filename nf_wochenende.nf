@@ -647,7 +647,7 @@ process growth_rate {
         
     bash runbatch_bed_to_csv.sh  >/dev/null 2>&1 
         
-    bash run_reproduction_determiner.sh  >/dev/null 2>&1
+    bash run_reproduction_determiner.sh
      
     echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
 
@@ -753,7 +753,7 @@ process raspir {
     echo "INFO: Started raspir analysis"
     cp raspir/* .
 
-    python raspir.py $input_csv ${prefix}.csv >/dev/null 2>&1
+    python raspir.py $input_csv ${prefix}.csv
     echo "INFO: Completed raspir"
 
     """
