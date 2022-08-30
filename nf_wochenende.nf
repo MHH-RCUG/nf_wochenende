@@ -579,7 +579,7 @@ process plots {
     cd plots
     cp ../*_window.txt . 
     cp ../*_window.txt.filt.csv .
-    bash runbatch_wochenende_plot.sh >/dev/null 2>&1
+    bash runbatch_wochenende_plot.sh
     
         
     echo "INFO: Completed Wochenende plot"
@@ -645,7 +645,7 @@ process growth_rate {
     echo "INFO: Started bacterial growth rate analysis"
     cp growth_rate/* .
         
-    bash runbatch_bed_to_csv.sh  >/dev/null 2>&1 
+    bash runbatch_bed_to_csv.sh
         
     bash run_reproduction_determiner.sh
      
@@ -696,7 +696,7 @@ process raspir_fileprep {
     echo "INFO: Started raspir analysis"
     cp raspir/* .
 
-    bash run_SLURM_file_prep.sh $bam >/dev/null 2>&1
+    bash run_SLURM_file_prep.sh $bam 
          
     echo "INFO: Completed raspir module"
 
