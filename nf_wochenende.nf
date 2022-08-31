@@ -313,18 +313,18 @@ process wochenende {
 
 
     output:
-    path "*.bam", emit: bams
+    //path "*.bam", emit: bams
     path "*.s.bam", emit: s_bams
     path "*.calmd.bam", emit: calmd_bams
     path "*.mm.bam", emit: mm_bams
     path "*.dup.bam", emit: dup_bams
-    path "*.bam.bai", emit: bam_bais
+    //path "*.bam.bai", emit: bam_bais
     path "*.s.bam.bai", emit: s_bam_bais
     path "*.calmd.bam.bai", emit: calmd_bam_bais
     path "*.mm.bam.bai", emit: mm_bam_bais
     path "*.dup.bam.bai", emit: dup_bam_bais
-    path "*.bai"
-    path "*.fastq"
+    //path "*.bai"
+    //path "*.fastq"
     path "*.bam.txt", emit: bam_txts
     path "*.calmd.bam.txt", emit: calmd_bam_txts
     //path "*.*", emit: all       // lets avoid this, else we get scripts in the output dir
@@ -578,7 +578,7 @@ process plots {
     cd plots
     cp ../*_window.txt . 
     cp ../*_window.txt.filt.csv .
-    bash runbatch_wochenende_plot.sh >/dev/null 2>&1
+    bash runbatch_wochenende_plot.sh
     
         
     echo "INFO: Completed Wochenende plot"
@@ -644,9 +644,9 @@ process growth_rate {
     echo "INFO: Started bacterial growth rate analysis"
     cp growth_rate/* .
         
-    bash runbatch_bed_to_csv.sh  >/dev/null 2>&1 
+    bash runbatch_bed_to_csv.sh
         
-    bash run_reproduction_determiner.sh  >/dev/null 2>&1
+    bash run_reproduction_determiner.sh
      
     echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
 
@@ -695,7 +695,7 @@ process raspir_fileprep {
     echo "INFO: Started raspir analysis"
     cp raspir/* .
 
-    bash run_SLURM_file_prep.sh $bam >/dev/null 2>&1
+    bash run_SLURM_file_prep.sh $bam 
          
     echo "INFO: Completed raspir module"
 
@@ -752,7 +752,7 @@ process raspir {
     echo "INFO: Started raspir analysis"
     cp raspir/* .
 
-    python raspir.py $input_csv ${prefix}.csv >/dev/null 2>&1
+    python raspir.py $input_csv ${prefix}.csv
     echo "INFO: Completed raspir"
 
     """
