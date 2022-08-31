@@ -15,7 +15,7 @@ v0.1.7
 v0.1.6
 v0.1.5
 v0.1.4
-v0.1.3  Solve growth_rate folder output problems with file
+v0.1.3  Solve growth_rate folder output problems by changing to files
 v0.1.2  All args set in nextflow.config, reassigned for Python in nf_wochenende.nf
 v0.1.1  Haybaler args passed from nextflow.config
 v0.1.0  Raspir done, heat trees and heatmaps need to be manually tested as no R server in cluster
@@ -217,33 +217,51 @@ workflow {
     // run main Wochenende process
     wochenende(input_fastq_R1)
     
-    // run reporting
-    reporting(wochenende.out.calmd_bam_txts.flatten())
+    if (params.stage_reporting) {
+        // run reporting
+        reporting(wochenende.out.calmd_bam_txts.flatten())
+    }
 
-    // run haybaler
-    haybaler(reporting.out.us_csvs.collect())
+    if (params.stage_haybaler) {
+        // run haybaler
+        haybaler(reporting.out.us_csvs.collect())
+    }
 
-    // run plots on the calmd_bams only
-    plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    if (params.stage_plots) {
+        // run plots on the calmd_bams only
+        plots(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    }
 
-    // run growth_rate prediction step
-    growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+    if (params.stage_growth_rate) {
+        // run growth_rate prediction step
+        growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
+    }
 
-    // run raspir steps
-    raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    if (params.stage_raspir) {
+        // run raspir steps
+        raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
+    }
 
-    raspir(raspir_fileprep.out)
-    
-    // multiqc
-    multiqc(wochenende.out.collect())
+    if (params.stage_raspir) {
+        raspir(raspir_fileprep.out)
+    }
 
-    // create heattrees from haybaler output
-    // needs R server configured in config.yml
-    //heattrees(haybaler.out.haybaler_heattree_csvs)
+    if (params.stage_multiqc) {
+        // multiqc
+        //multiqc(wochenende.out.calmd_bams.collect(), wochenende.out.calmd_bam_bais.collect())
+    }
 
-    // create heatmaps from haybaler ouput
-    // needs R server
-    //heatmaps(haybaler.out.haybaler_csvs.flatten())
+    if (params.stage_heattrees) {
+        // create heattrees from haybaler output
+        // needs R server configured in config.yml
+        heattrees(haybaler.out.haybaler_heattree_csvs)
+    }
+
+    if (params.stage_heatmaps) {
+        // create heatmaps from haybaler ouput
+        // needs R server
+        heatmaps(haybaler.out.haybaler_csvs.flatten())
+    }
 
 }
 
@@ -295,18 +313,18 @@ process wochenende {
 
 
     output:
-    path "*.bam", emit: bams
+    //path "*.bam", emit: bams
     path "*.s.bam", emit: s_bams
     path "*.calmd.bam", emit: calmd_bams
     path "*.mm.bam", emit: mm_bams
     path "*.dup.bam", emit: dup_bams
-    path "*.bam.bai", emit: bam_bais
+    //path "*.bam.bai", emit: bam_bais
     path "*.s.bam.bai", emit: s_bam_bais
     path "*.calmd.bam.bai", emit: calmd_bam_bais
     path "*.mm.bam.bai", emit: mm_bam_bais
     path "*.dup.bam.bai", emit: dup_bam_bais
-    path "*.bai"
-    path "*.fastq"
+    //path "*.bai"
+    //path "*.fastq"
     path "*.bam.txt", emit: bam_txts
     path "*.calmd.bam.txt", emit: calmd_bam_txts
     //path "*.*", emit: all       // lets avoid this, else we get scripts in the output dir
@@ -560,7 +578,7 @@ process plots {
     cd plots
     cp ../*_window.txt . 
     cp ../*_window.txt.filt.csv .
-    bash runbatch_wochenende_plot.sh >/dev/null 2>&1
+    bash runbatch_wochenende_plot.sh
     
         
     echo "INFO: Completed Wochenende plot"
@@ -626,9 +644,9 @@ process growth_rate {
     echo "INFO: Started bacterial growth rate analysis"
     cp growth_rate/* .
         
-    bash runbatch_bed_to_csv.sh  >/dev/null 2>&1 
+    bash runbatch_bed_to_csv.sh
         
-    bash run_reproduction_determiner.sh  >/dev/null 2>&1
+    bash run_reproduction_determiner.sh
      
     echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
 
@@ -677,7 +695,7 @@ process raspir_fileprep {
     echo "INFO: Started raspir analysis"
     cp raspir/* .
 
-    bash run_SLURM_file_prep.sh $bam >/dev/null 2>&1
+    bash run_SLURM_file_prep.sh $bam 
          
     echo "INFO: Completed raspir module"
 
@@ -734,7 +752,7 @@ process raspir {
     echo "INFO: Started raspir analysis"
     cp raspir/* .
 
-    python raspir.py $input_csv ${prefix}.csv >/dev/null 2>&1
+    python raspir.py $input_csv ${prefix}.csv
     echo "INFO: Completed raspir"
 
     """
@@ -806,7 +824,8 @@ process multiqc {
     cpus = 1
 	// If job fails, try again with more memory
 	memory { 4.GB * task.attempt }
-	errorStrategy 'retry'
+	//errorStrategy 'terminate'
+    errorStrategy 'ignore'
 
     // TODO - singularity 
     conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
@@ -817,15 +836,19 @@ process multiqc {
         publishDir path: "${params.outdir}/multiqc", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith('.html')) "$filename"
+                          else if (filename.endsWith('.idxstats')) "$filename"
+                          else if (filename.endsWith('.stats')) "$filename"
                           else filename
                     }
     }
 
     input:
-    path multiqc_files
-    file flagstat
-    file idxstats
-    file stats
+    //path multiqc_files
+    //file flagstat
+    //file idxstats
+    //file stats
+    file bam
+    file bai
 
     output:
     path "*multiqc_report.html", emit: report
@@ -840,6 +863,9 @@ process multiqc {
     name = "All stats files"
     
     """
+    samtools stats -r ${params.ref} ${bam} > ${bam}.stats
+    samtools flagstat ${bam} > ${bam}.flagstat
+    samtools idxstats ${bam} > ${bam}.idxstats
     multiqc -f .
     
     """
