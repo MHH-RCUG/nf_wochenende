@@ -14,7 +14,7 @@ v0.1.8
 v0.1.7
 v0.1.6
 v0.1.5
-v0.1.4
+v0.1.4  Add remove secondary alignments setting
 v0.1.3  Solve growth_rate folder output problems by changing to files
 v0.1.2  All args set in nextflow.config, reassigned for Python in nf_wochenende.nf
 v0.1.1  Haybaler args passed from nextflow.config
@@ -98,7 +98,7 @@ if (params.help) {
 workflow {
 
     println "Starting nf_wochenende.nf"
-    println "Version 0.1.3 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
+    println "Version 0.1.4 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
 
     // File inputs
     // R1 Read inputs, R2 reads are linked in by the process if they exist.
@@ -112,6 +112,7 @@ workflow {
     println "Using this rscript_bin: " + params.rscript_bin
     println "Using this readType setting: " + params.readType
     println "Using this longread setting: " + params.longread
+    println "Using this remove_secondary setting: " + params.remove_secondary
     println "Using this aligner setting: " + params.aligner
     println "Using this mismatches setting: " + params.mismatches
     println "Using this nextera setting: " + params.nextera
@@ -134,6 +135,7 @@ workflow {
     no_fastqc = true            // Do not run fastqc
     fastp = false               // Use fastp trimming tool (short reads)
     trim_galore = false         // Use trim_galore trimmer (short reads)
+    remove_secondary = true     // Remove secondary alignments
     //  usage: run_Wochenende.py [-h] [--aligner {bwamem,minimap2short,minimap2long,ngmlr}] [--readType {PE,SE}] [--ref REF] [--threads THREADS] [--fastp] [--nextera] [--trim_galore] [--debug] [--longread]
     //                       [--no_duplicate_removal] [--no_prinseq] [--no_fastqc] [--no_abra] [--mq20] [--mq30] [--remove_mismatching REMOVE_MISMATCHING] [--force_restart]
     //                       fastq
@@ -169,6 +171,12 @@ workflow {
        params.py_longread = ""
     }
 
+    if (params.remove_secondary) {
+       params.py_remove_secondary = "--remove_secondary"
+    } else {
+       params.py_remove_secondary = ""
+    }
+
     if (params.nextera) {
        params.py_nextera = "--nextera"
     } else {
@@ -199,6 +207,7 @@ workflow {
     println "Using this HAYBALER_DIR: " + params.HAYBALER_DIR
     println "Using this readType setting: " + params.readType
     println "Using this longread setting: " + params.py_longread
+    println "Using this remove_secondary setting: " + params.py_remove_secondary
     println "Using this aligner setting: " + params.aligner
     println "Using this mismatches setting: " + params.mismatches
     println "Using this nextera setting: " + params.py_nextera
@@ -361,7 +370,7 @@ process wochenende {
         echo "Trying to link in R2, the second pair of the paired end reads. Will fail if does not exist (use --readType SE in that case)"
         ln -s ${launchDir}/$fastq_R2 .
     fi
-    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner --remove_mismatching $params.mismatches --readType $params.readType $params.py_mq $params.py_abra $params.py_prinseq $params.py_no_dup_removal $params.py_longread $params.py_fastqc $params.py_nextera $params.py_fastp $params.py_trim_galore --force_restart $fastq
+    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner --remove_mismatching $params.mismatches --readType $params.readType $params.py_mq $params.py_abra $params.py_prinseq $params.py_no_dup_removal $params.py_longread $params.py_remove_secondary $params.py_fastqc $params.py_nextera $params.py_fastp $params.py_trim_galore --force_restart $fastq
 
     """
 
