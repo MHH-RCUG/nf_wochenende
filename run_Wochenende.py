@@ -1490,8 +1490,9 @@ def main(args, sys_argv):
         )
 
         if args.remove_secondary:
-            print("PYTHONREMOVESECONDARY")
-            currentFile = runFunc("runRemoveSecondaryAlignments", removeSecondaryAlignments, currentFile, False)
+            currentFile = runFunc("runRemoveSecondaryAlignments", removeSecondaryAlignments, currentFile, True)
+            currentFile = runFunc("runBAMindex12", runBAMindex, currentFile, False)
+            currentFile = runFunc("runIDXstats12", runIDXstats, currentFile, False)
 
         if args.remove_mismatching:
             # currentFile = runFunc("runBamtools", runBamtools, currentFile, True)
