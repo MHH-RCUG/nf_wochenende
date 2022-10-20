@@ -1026,8 +1026,9 @@ def removeSecondaryAlignments(stage_infile):
     prefix = stage_infile.replace(".bam", "")
     stage_outfile = prefix + ".nosec" + ".bam"
     samtoolsRemoveSecondaryCmd = [
-        #samtools -F 256 -bo filt.bam orig.bam
+        #samtools view -F 256 -bo filt.bam orig.bam
         path_samtools,
+        "view",
         "-F",
         "256",
         "-bo",
