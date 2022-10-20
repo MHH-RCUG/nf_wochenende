@@ -1488,7 +1488,8 @@ def main(args, sys_argv):
             False,
             args.readType,
         )
-
+        # Cryptic errors occur if this is not set, therefore removing secondary alignments is currently compulsory
+        args.remove_secondary = True
         if args.remove_secondary:
             currentFile = runFunc("runRemoveSecondaryAlignments", removeSecondaryAlignments, currentFile, True)
             currentFile = runFunc("runBAMindex12", runBAMindex, currentFile, False)
