@@ -1489,6 +1489,7 @@ def main(args, sys_argv):
         )
 
         if args.remove_secondary:
+            println("PYTHONREMOVESECONDARY")
             currentFile = runFunc("runRemoveSecondaryAlignments", removeSecondaryAlignments, currentFile, False)
 
         if args.remove_mismatching:
