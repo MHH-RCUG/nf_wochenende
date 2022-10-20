@@ -77,7 +77,7 @@ import argparse
 import time
 import yaml
 
-version = "2.0.3 - July 2022"
+version = "2.0.4 - October 2022"
 
 
 ##############################
