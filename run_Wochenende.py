@@ -8,6 +8,7 @@ Author: Fabian Friedrich
 Author: Sophia Poertner
 
 Changelog
+2.0.4 remove secondary read alignments for aligner minimap2
 2.0.3 ref.tmp file creation deprecated
 2.0.2 Use full path to reference with --ref, deprecate --metagenome
 2.0.1 remove abra after security concerns with log4j
@@ -76,7 +77,7 @@ import argparse
 import time
 import yaml
 
-version = "2.0.3 - July 2022"
+version = "2.0.4 - October 2022"
 
 
 ##############################
@@ -1019,6 +1020,25 @@ def runGetUnmappedReads(stage_infile, readType):
     return 0
 
 
+def removeSecondaryAlignments(stage_infile):
+    # Remove reads with less than MQ20/30
+    stage = "Remove secondary alignments from BAM"
+    prefix = stage_infile.replace(".bam", "")
+    stage_outfile = prefix + ".nosec" + ".bam"
+    samtoolsRemoveSecondaryCmd = [
+        #samtools view -F 256 -bo filt.bam orig.bam
+        path_samtools,
+        "view",
+        "-F",
+        "256",
+        "-bo",
+        stage_outfile,
+        stage_infile,
+    ]
+    runStage(stage, samtoolsRemoveSecondaryCmd)
+    rejigFiles(stage, stage_infile, stage_outfile)
+    return stage_outfile    
+
 def runMappingQualityFilter(stage_infile, mapping_quality_integer):
     # Remove reads with less than MQ20/30
     stage = "Remove MQ20/30 reads"
@@ -1468,6 +1488,12 @@ def main(args, sys_argv):
             False,
             args.readType,
         )
+        # Cryptic errors occur if this is not set, therefore removing secondary alignments is currently compulsory
+        args.remove_secondary = True
+        if args.remove_secondary:
+            currentFile = runFunc("runRemoveSecondaryAlignments", removeSecondaryAlignments, currentFile, True)
+            currentFile = runFunc("runBAMindex12", runBAMindex, currentFile, False)
+            currentFile = runFunc("runIDXstats12", runIDXstats, currentFile, False)
 
         if args.remove_mismatching:
             # currentFile = runFunc("runBamtools", runBamtools, currentFile, True)
@@ -1735,6 +1761,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--no_duplicate_removal",
         help="Skips steps for duplicate removal. Recommended for amplicon sequencing.",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--remove_secondary",
+        help="Removes secondary alignments. Recommended when using aligner minimap2.",
         action="store_true",
     )
 
