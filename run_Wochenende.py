@@ -1034,7 +1034,6 @@ def removeSecondaryAlignments(stage_infile):
         "-bo",
         stage_outfile,
         stage_infile,
-        "> /dev/null"
     ]
     runStage(stage, samtoolsRemoveSecondaryCmd)
     rejigFiles(stage, stage_infile, stage_outfile)
