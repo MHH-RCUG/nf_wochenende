@@ -1419,6 +1419,8 @@ def main(args, sys_argv):
     # 	adapter_path = adapter_fastp_nextera
     # if args.solid: # args.solid does not exist
     #    adapter_path = adapter_fastp_solid
+    if args.fastp:
+        adapter_path = adapter_fastp_general
     if args.nextera:
         adapter_path = adapter_fastp_general
 
@@ -1547,7 +1549,7 @@ def main(args, sys_argv):
         currentFile = runFunc("runIDXstats5", runIDXstats, currentFile, False)
 
     #############
-    # Paired end input reads. Long reads cannot be paired end (true 2020).
+    # Paired end input reads. Long reads cannot be paired end (true 2020-22).
     #############
     elif args.readType == "PE":
         print("Input File 1 : " + currentFile)
@@ -1561,6 +1563,8 @@ def main(args, sys_argv):
         # currentFile = runFunc("runFastUniq", runFastUniq, currentFile, True)
         # Prinseq not tested for PE data
         # currentFile = runFunc("runPrinseq", runPrinseqPE, currentFile, True, deriveRead2Name(currentFile))
+
+        # Trimming: use either fastp, nextera or (default) truseq/ ultraII adapter files
         if args.fastp:
             currentFile = runFunc(
                 "runFastpPE",
@@ -1569,9 +1573,9 @@ def main(args, sys_argv):
                 True,
                 deriveRead2Name(currentFile),
                 args.threads,
+                adapter_path,
             )
-        # Trimming: use either nextera or (default) truseq/ ultraII adapter files
-        if args.nextera:
+        elif args.nextera:
             currentFile = runFunc(
                 "runTMTrimmingPE", runTMTrimmingPE, currentFile, True, adapter_nextera
             )
