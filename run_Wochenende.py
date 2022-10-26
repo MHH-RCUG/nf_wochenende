@@ -1563,7 +1563,7 @@ def main(args, sys_argv):
         # currentFile = runFunc("runFastUniq", runFastUniq, currentFile, True)
         # Prinseq not tested for PE data
         # currentFile = runFunc("runPrinseq", runPrinseqPE, currentFile, True, deriveRead2Name(currentFile))
-        
+
         # Trimming: use either fastp, nextera or (default) truseq/ ultraII adapter files
         if args.fastp:
             currentFile = runFunc(
@@ -1575,7 +1575,7 @@ def main(args, sys_argv):
                 args.threads,
                 adapter_path,
             )
-        else if args.nextera:
+        elif args.nextera:
             currentFile = runFunc(
                 "runTMTrimmingPE", runTMTrimmingPE, currentFile, True, adapter_nextera
             )
