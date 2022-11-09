@@ -245,7 +245,7 @@ workflow {
         // run growth_rate prediction step
         growth_rate(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais, wochenende.out.bam_txts)
     }
-    
+
     if (params.stage_raspir) {
         // run raspir steps
         raspir_fileprep(wochenende.out.calmd_bams, wochenende.out.calmd_bam_bais)
@@ -254,7 +254,6 @@ workflow {
     if (params.stage_raspir) {
         raspir(raspir_fileprep.out)
     }
-    
 
     if (params.stage_multiqc) {
         // multiqc
