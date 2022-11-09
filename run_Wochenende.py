@@ -1519,7 +1519,7 @@ def main(args, sys_argv):
         # Cryptic errors occur if this is not set, therefore removing suppl alignments is currently compulsory
         args.remove_supplementary = True
         if args.remove_supplementary:
-            currentFile = runFunc("runRemoveSupplementaryAlignments", removeSupplmentaryAlignments, currentFile, True)
+            currentFile = runFunc("runRemoveSupplementaryAlignments", removeSupplementaryAlignments, currentFile, True)
             currentFile = runFunc("runBAMindex32", runBAMindex, currentFile, False)
             currentFile = runFunc("runIDXstats32", runIDXstats, currentFile, False)
             
