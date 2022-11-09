@@ -1025,7 +1025,7 @@ def removeSecondaryAlignments(stage_infile):
     # Remove reads with less than MQ20/30
     stage = "Remove secondary alignments from BAM"
     prefix = stage_infile.replace(".bam", "")
-    stage_outfile = prefix + ".nosec" + ".bam"
+    stage_outfile = prefix + ".ns" + ".bam"
     samtoolsRemoveSecondaryCmd = [
         #samtools view -F 256 -bo filt.bam orig.bam
         path_samtools,
@@ -1044,7 +1044,7 @@ def removeSupplementaryAlignments(stage_infile):
     # Remove reads with less than MQ20/30
     stage = "Remove supplementary alignments from BAM"
     prefix = stage_infile.replace(".bam", "")
-    stage_outfile = prefix + ".nosec" + ".bam"
+    stage_outfile = prefix + ".ns" + ".bam"
     samtoolsRemoveSupplCmd = [
         #samtools view -F 2048 -bo filt.bam orig.bam
         path_samtools,
