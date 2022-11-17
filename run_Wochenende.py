@@ -1025,7 +1025,7 @@ def removeSecondaryAlignments(stage_infile):
     # Remove reads with less than MQ20/30
     stage = "Remove secondary alignments from BAM"
     prefix = stage_infile.replace(".bam", "")
-    stage_outfile = prefix + ".nosec" + ".bam"
+    stage_outfile = prefix + ".ns" + ".bam"
     samtoolsRemoveSecondaryCmd = [
         #samtools view -F 256 -bo filt.bam orig.bam
         path_samtools,
@@ -1044,7 +1044,7 @@ def removeSupplementaryAlignments(stage_infile):
     # Remove reads with less than MQ20/30
     stage = "Remove supplementary alignments from BAM"
     prefix = stage_infile.replace(".bam", "")
-    stage_outfile = prefix + ".nosec" + ".bam"
+    stage_outfile = prefix + ".ns" + ".bam"
     samtoolsRemoveSupplCmd = [
         #samtools view -F 2048 -bo filt.bam orig.bam
         path_samtools,
@@ -1519,7 +1519,7 @@ def main(args, sys_argv):
         # Cryptic errors occur if this is not set, therefore removing suppl alignments is currently compulsory
         args.remove_supplementary = True
         if args.remove_supplementary:
-            currentFile = runFunc("runRemoveSupplementaryAlignments", removeSupplmentaryAlignments, currentFile, True)
+            currentFile = runFunc("runRemoveSupplementaryAlignments", removeSupplementaryAlignments, currentFile, True)
             currentFile = runFunc("runBAMindex32", runBAMindex, currentFile, False)
             currentFile = runFunc("runIDXstats32", runIDXstats, currentFile, False)
             

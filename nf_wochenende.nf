@@ -13,7 +13,7 @@ v0.1.9
 v0.1.8
 v0.1.7
 v0.1.6
-v0.1.5
+v0.1.5  Remove supplementary aligns setting
 v0.1.4  Add remove secondary alignments setting
 v0.1.3  Solve growth_rate folder output problems by changing to files
 v0.1.2  All args set in nextflow.config, reassigned for Python in nf_wochenende.nf
@@ -113,6 +113,7 @@ workflow {
     println "Using this readType setting: " + params.readType
     println "Using this longread setting: " + params.longread
     println "Using this remove_secondary setting: " + params.remove_secondary
+    println "Using this remove_supplementary setting: " + params.remove_supplementary
     println "Using this aligner setting: " + params.aligner
     println "Using this mismatches setting: " + params.mismatches
     println "Using this nextera setting: " + params.nextera
@@ -136,6 +137,8 @@ workflow {
     fastp = false               // Use fastp trimming tool (short reads)
     trim_galore = false         // Use trim_galore trimmer (short reads)
     remove_secondary = true     // Remove secondary alignments
+    remove_supplementary = true     // Remove supplementary alignments
+
     //  usage: run_Wochenende.py [-h] [--aligner {bwamem,minimap2short,minimap2long,ngmlr}] [--readType {PE,SE}] [--ref REF] [--threads THREADS] [--fastp] [--nextera] [--trim_galore] [--debug] [--longread]
     //                       [--no_duplicate_removal] [--no_prinseq] [--no_fastqc] [--no_abra] [--mq20] [--mq30] [--remove_mismatching REMOVE_MISMATCHING] [--force_restart]
     //                       fastq
@@ -177,6 +180,12 @@ workflow {
        params.py_remove_secondary = ""
     }
 
+    if (params.remove_supplementary) {
+       params.py_remove_supplementary = "--remove_supplementary"
+    } else {
+       params.py_remove_supplementary = ""
+    }
+
     if (params.nextera) {
        params.py_nextera = "--nextera"
     } else {
@@ -208,6 +217,7 @@ workflow {
     println "Using this readType setting: " + params.readType
     println "Using this longread setting: " + params.py_longread
     println "Using this remove_secondary setting: " + params.py_remove_secondary
+    println "Using this remove_supplementary setting: " + params.py_remove_supplementary
     println "Using this aligner setting: " + params.aligner
     println "Using this mismatches setting: " + params.mismatches
     println "Using this nextera setting: " + params.py_nextera
@@ -281,7 +291,6 @@ workflow {
  *  Run wochenende
  *  Parcels the run_Wochenende.py python script into a single Nextflow process
  *  Output - sorted bams for each step, and bam.txt files with read counts per chromosome.
- *  Terminates on error, since this step provides data for all further steps.
  */
 
 process wochenende {
@@ -290,12 +299,12 @@ process wochenende {
 	// If job fails, try again with more memory
 	memory { 40.GB * task.attempt }
     //memory 40.GB
-	errorStrategy 'terminate'
+    //errorStrategy 'terminate'
     //errorStrategy 'retry'
+    errorStrategy 'ignore'
 
     // Use conda env defined in nextflow.config file
     // TODO - make a singularity container
-    //conda '/home/hpc/davenpor/programs/miniconda3/envs/wochenende/'
     conda params.conda_wochenende
 
 
@@ -367,7 +376,7 @@ process wochenende {
         echo "Trying to link in R2, the second pair of the paired end reads. Will fail if does not exist (use --readType SE in that case)"
         ln -s ${launchDir}/$fastq_R2 .
     fi
-    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner --remove_mismatching $params.mismatches --readType $params.readType $params.py_mq $params.py_abra $params.py_prinseq $params.py_no_dup_removal $params.py_longread $params.py_remove_secondary $params.py_fastqc $params.py_nextera $params.py_fastp $params.py_trim_galore --force_restart $fastq
+    python3 run_Wochenende.py --ref ${params.ref} --threads $task.cpus --aligner $params.aligner --remove_mismatching $params.mismatches --readType $params.readType $params.py_mq $params.py_abra $params.py_prinseq $params.py_no_dup_removal $params.py_longread $params.py_remove_secondary $params.py_remove_supplementary $params.py_fastqc $params.py_nextera $params.py_fastp $params.py_trim_galore --force_restart $fastq
 
     """
 
@@ -469,7 +478,7 @@ process heattrees {
     executor = 'local'
 
     conda params.conda_haybaler
-	errorStrategy 'ignore'
+    errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
@@ -506,7 +515,7 @@ process heatmaps {
 
     executor = 'local'
 
-	errorStrategy 'ignore'
+    errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
@@ -536,10 +545,10 @@ process heatmaps {
 process plots {
 
     cpus = 1
-	// If job fails, try again with more memory if retry set
-	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
-    //errorStrategy 'ignore'
+    // If job fails, try again with more memory if retry set
+    memory { 8.GB * task.attempt }
+    //errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -603,9 +612,9 @@ process plots {
 process growth_rate {
 
     cpus = 1
-	// If job fails, try again with more memory
-	memory { 32.GB * task.attempt }
-	//errorStrategy 'terminate'
+    // If job fails, try again with more memory
+    memory { 32.GB * task.attempt }
+    //errorStrategy 'terminate'
     errorStrategy 'ignore'
     //errorStrategy 'retry'
 
@@ -671,9 +680,9 @@ process growth_rate {
 process raspir_fileprep {
 
     cpus = 8
-	// If job fails, try again with more memory
-	memory { 8.GB * task.attempt }
-	//errorStrategy 'terminate'
+    // If job fails, try again with more memory
+    memory { 8.GB * task.attempt }
+    //errorStrategy 'terminate'
     errorStrategy 'ignore'
     //errorStrategy 'retry'
 
@@ -718,9 +727,9 @@ process raspir_fileprep {
 process raspir {
 
     cpus = 1
-	// If job fails, try again with more memory
-	memory { 8.GB * task.attempt }
-	//errorStrategy 'terminate'
+    // If job fails, try again with more memory
+    memory { 8.GB * task.attempt }
+    //errorStrategy 'terminate'
     errorStrategy 'ignore'
     //errorStrategy 'retry'
 
@@ -776,12 +785,12 @@ process raspir {
 process convert_bam_cram {
 
     cpus = 8
-	// If job fails, try again with more memory
-	memory { 32.GB * task.attempt }
-	errorStrategy 'retry'
+    // If job fails, try again with more memory
+    memory { 32.GB * task.attempt }
+    errorStrategy 'retry'
 
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/wochenende/'
-
+    // Use conda env defined in nextflow.config file
+    conda params.conda_haybaler
 
     tag "$name"
     label 'process_medium'
@@ -829,9 +838,9 @@ process convert_bam_cram {
 
 process multiqc {
     cpus = 1
-	// If job fails, try again with more memory
-	memory { 4.GB * task.attempt }
-	//errorStrategy 'terminate'
+    // If job fails, try again with more memory
+    memory { 4.GB * task.attempt }
+    //errorStrategy 'terminate'
     errorStrategy 'ignore'
 
     // TODO - singularity 
