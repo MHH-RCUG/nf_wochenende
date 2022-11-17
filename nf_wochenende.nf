@@ -299,9 +299,9 @@ process wochenende {
 	// If job fails, try again with more memory
 	memory { 40.GB * task.attempt }
     //memory 40.GB
-    //errorStrategy 'terminate'
+    errorStrategy 'terminate'
     //errorStrategy 'retry'
-    errorStrategy 'ignore'
+    //errorStrategy 'ignore'
 
     // Use conda env defined in nextflow.config file
     // TODO - make a singularity container
