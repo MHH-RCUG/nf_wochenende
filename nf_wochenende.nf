@@ -291,7 +291,6 @@ workflow {
  *  Run wochenende
  *  Parcels the run_Wochenende.py python script into a single Nextflow process
  *  Output - sorted bams for each step, and bam.txt files with read counts per chromosome.
- *  Terminates on error, since this step provides data for all further steps.
  */
 
 process wochenende {
@@ -300,12 +299,12 @@ process wochenende {
 	// If job fails, try again with more memory
 	memory { 40.GB * task.attempt }
     //memory 40.GB
-	errorStrategy 'terminate'
+    //errorStrategy 'terminate'
     //errorStrategy 'retry'
+    errorStrategy 'ignore'
 
     // Use conda env defined in nextflow.config file
     // TODO - make a singularity container
-    //conda '/home/hpc/davenpor/programs/miniconda3/envs/wochenende/'
     conda params.conda_wochenende
 
 
@@ -479,7 +478,7 @@ process heattrees {
     executor = 'local'
 
     conda params.conda_haybaler
-	errorStrategy 'ignore'
+    errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
@@ -516,7 +515,7 @@ process heatmaps {
 
     executor = 'local'
 
-	errorStrategy 'ignore'
+    errorStrategy 'ignore'
     //errorStrategy 'terminate'
 
     publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
@@ -546,10 +545,10 @@ process heatmaps {
 process plots {
 
     cpus = 1
-	// If job fails, try again with more memory if retry set
-	memory { 8.GB * task.attempt }
-	errorStrategy 'terminate'
-    //errorStrategy 'ignore'
+    // If job fails, try again with more memory if retry set
+    memory { 8.GB * task.attempt }
+    //errorStrategy 'terminate'
+    errorStrategy 'ignore'
     //errorStrategy 'retry'
 
     // Use conda env defined in nextflow.config file
@@ -613,9 +612,9 @@ process plots {
 process growth_rate {
 
     cpus = 1
-	// If job fails, try again with more memory
-	memory { 32.GB * task.attempt }
-	//errorStrategy 'terminate'
+    // If job fails, try again with more memory
+    memory { 32.GB * task.attempt }
+    //errorStrategy 'terminate'
     errorStrategy 'ignore'
     //errorStrategy 'retry'
 
@@ -681,9 +680,9 @@ process growth_rate {
 process raspir_fileprep {
 
     cpus = 8
-	// If job fails, try again with more memory
-	memory { 8.GB * task.attempt }
-	//errorStrategy 'terminate'
+    // If job fails, try again with more memory
+    memory { 8.GB * task.attempt }
+    //errorStrategy 'terminate'
     errorStrategy 'ignore'
     //errorStrategy 'retry'
 
@@ -728,9 +727,9 @@ process raspir_fileprep {
 process raspir {
 
     cpus = 1
-	// If job fails, try again with more memory
-	memory { 8.GB * task.attempt }
-	//errorStrategy 'terminate'
+    // If job fails, try again with more memory
+    memory { 8.GB * task.attempt }
+    //errorStrategy 'terminate'
     errorStrategy 'ignore'
     //errorStrategy 'retry'
 
@@ -786,12 +785,12 @@ process raspir {
 process convert_bam_cram {
 
     cpus = 8
-	// If job fails, try again with more memory
-	memory { 32.GB * task.attempt }
-	errorStrategy 'retry'
+    // If job fails, try again with more memory
+    memory { 32.GB * task.attempt }
+    errorStrategy 'retry'
 
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/wochenende/'
-
+    // Use conda env defined in nextflow.config file
+    conda params.conda_haybaler
 
     tag "$name"
     label 'process_medium'
@@ -839,9 +838,9 @@ process convert_bam_cram {
 
 process multiqc {
     cpus = 1
-	// If job fails, try again with more memory
-	memory { 4.GB * task.attempt }
-	//errorStrategy 'terminate'
+    // If job fails, try again with more memory
+    memory { 4.GB * task.attempt }
+    //errorStrategy 'terminate'
     errorStrategy 'ignore'
 
     // TODO - singularity 
