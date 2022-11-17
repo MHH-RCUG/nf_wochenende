@@ -338,7 +338,7 @@ process wochenende {
     //path "*.nosec.bam", emit: nosec_bams
     //path "*.nosec.bam.bai", emit: nosec_bam_bais
     path "*.mm.bam", emit: mm_bams
-    path "*.mm.bam.bai", emit: mm_bam_bais
+    //path "*.mm.bam.bai", emit: mm_bam_bais
     path "*.dup.bam", emit: dup_bams
     path "*.dup.bam.bai", emit: dup_bam_bais
     path "*.bam.txt", emit: bam_txts
