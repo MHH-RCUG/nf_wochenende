@@ -716,6 +716,8 @@ def runAligner(stage_infile, aligner, index, noThreads, readType):
             "mem",
             "-t",
             str(noThreads),
+            "-L",
+            "100",
             "-R",
             '"@RG\\tID:' + readGroup + "_001\\tSM:" + readGroup + '"',
             str(index),
