@@ -8,6 +8,7 @@ Author: Fabian Friedrich
 Author: Sophia Poertner
 
 Changelog
+2.0.6 bwa mem soft clipping with PE reads problems, attempt to remove soft clipping
 2.0.5 remove supplementary read alignments for aligner minimap2
 2.0.4 remove secondary read alignments for aligner minimap2
 2.0.3 ref.tmp file creation deprecated
@@ -78,7 +79,7 @@ import argparse
 import time
 import yaml
 
-version = "2.0.5 - Nov 2022"
+version = "2.0.6 - Nov 2022"
 
 
 ##############################
@@ -621,8 +622,11 @@ def runTMTrimmingPE(stage_infile, adapter_file):
         "MINLEN:36",
     ]
     runStage(stage, trimCmd)
-    os.remove(tmpfile1)
-    os.remove(tmpfile2)
+    try:
+        os.remove(tmpfile1)
+        os.remove(tmpfile2)
+    except OSError as e:
+        print("Warning: Could not remove temp files :", e, file=sys.stderr)
     rejigFiles(stage, stage_infile, stage_outfile)
     return stage_outfile
 
@@ -716,6 +720,8 @@ def runAligner(stage_infile, aligner, index, noThreads, readType):
             "mem",
             "-t",
             str(noThreads),
+            "-L",
+            "250,250",
             "-R",
             '"@RG\\tID:' + readGroup + "_001\\tSM:" + readGroup + '"',
             str(index),
