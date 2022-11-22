@@ -622,8 +622,11 @@ def runTMTrimmingPE(stage_infile, adapter_file):
         "MINLEN:36",
     ]
     runStage(stage, trimCmd)
-    os.remove(tmpfile1)
-    os.remove(tmpfile2)
+    try:
+        os.remove(tmpfile1)
+        os.remove(tmpfile2)
+    except OSError as e:
+        print("Warning: Could not remove temp files :", e, file=sys.stderr)
     rejigFiles(stage, stage_infile, stage_outfile)
     return stage_outfile
 
