@@ -8,6 +8,7 @@ Author: Fabian Friedrich
 Author: Sophia Poertner
 
 Changelog
+2.0.6 bwa mem soft clipping with PE reads problems, attempt to remove soft clipping
 2.0.5 remove supplementary read alignments for aligner minimap2
 2.0.4 remove secondary read alignments for aligner minimap2
 2.0.3 ref.tmp file creation deprecated
@@ -78,7 +79,7 @@ import argparse
 import time
 import yaml
 
-version = "2.0.5 - Nov 2022"
+version = "2.0.6 - Nov 2022"
 
 
 ##############################
