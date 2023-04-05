@@ -43,6 +43,9 @@ Wochenende means weekend in German. The original developer, Tobias, called the p
 
 Please view and cite the Wochenende preprint at https://www.biorxiv.org/content/10.1101/2022.03.18.484377v2
 
+## Paper
+
+The paper is now in BMC genomics at https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-022-08985-9
 
 ## Installation
 
