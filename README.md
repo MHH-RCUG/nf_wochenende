@@ -47,6 +47,10 @@ Please view and cite the Wochenende preprint at https://www.biorxiv.org/content/
 
 The paper is now in BMC genomics at https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-022-08985-9
 
+## Reference sequences
+
+See the [Wiki](https://github.com/MHH-RCUG/nf_wochenende/wiki) section Installation on where to download the reference sequence. If you work with clinical data, ie. where the main contaminant is human, that you should **NOT** remove the human from this sequence, since this will lead to false positive assignments of human reads to various bacteria. Reads are short, and the aligner will try to assign the human reads to bacteria (with mismatches) which can cause problems. If you work with other contaminants, eg mouse associated metagenomes, then you will need to remove the human and add the mouse genome to the supplied reference sequence (see the Wiki section on `Building a reference sequence`).
+
 ## Installation
 
 Quick install and run guide for nf_wochenende 
