@@ -19,14 +19,13 @@ Features include (see programs listed below at the bottom of this page)
 - trimming (Trimmomatic or fastp or trim galore or ea-utils)
 - alignment (bwa mem, or minimap2 for short reads, minimap2 or ngmlr for long reads)
 - SAM-> BAM conversion (samtools and sambamba)
-- AlignerBoost Mapping Quality recalculation (in testing April-June 2021)
 - Report % aligned reads (samtools)
 - Output unmapped reads as fastq (samtools)  (from v1.4) 
 - Post-alignment duplicate removal (Samtools from v1.7.8, Sambamba)
 - Removal reads with x mismatches (bamtools), adjustable from v1.7.3
 - Realignment (Abra2)
 - MD tag marking (Samtools)
-- Normalization (to Bacteria per Human cell, RPMM Reads Per Million sequenced reads per Million reference bases etc, see Reporting below for details)
+- Normalization (to Bacteria per Human cell, RPMM Reads Per Million sequenced reads per Million reference bases etc, see Reporting section in the docs for details)
 - Visualization (chromosome coverage, intended for bacteria in metagenomics projects) (from v1.4)
 - Growth rate estimation. Estimate how fast detected bacteria are growing
 - Rare species prediction (Raspir)
@@ -55,6 +54,7 @@ See the [Wiki](https://github.com/MHH-RCUG/nf_wochenende/wiki) section Installat
 
 Quick install and run guide for nf_wochenende 
 * See full installation docs here: https://github.com/MHH-RCUG/nf_wochenende/wiki
+* Clone the repo, get the fasta reference sequence
 * Edit config in `config.yaml`
 * Edit config in `nextflow.config`  (cluster scheduler or local server, path to Wochenende and haybaler git clones and conda envs)
 
@@ -67,6 +67,7 @@ Output
 * One subfolder is output for each successful stage (nextflow process)
 * See docs here: https://github.com/MHH-RCUG/nf_wochenende/wiki
 
+Note that if you want to avoid Nextflow for some reason you can just run the Python script - `python run_Wochenende.py`
 
 
 
@@ -106,3 +107,7 @@ Optional extras
 * Colin Davenport
 * Lisa Hollstein
 * Ilona Rosenboom
+
+## Questions ? 
+
+Please post an issue in this repo.
