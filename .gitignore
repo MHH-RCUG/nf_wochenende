@@ -1,6 +1,7 @@
 .nextflow/
 output/*
 work/*
+.pixi/*
 *html*
 *log*
 ref.fa.*

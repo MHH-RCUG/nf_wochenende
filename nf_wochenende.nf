@@ -295,23 +295,8 @@ workflow {
 
 process wochenende {
 
-    cpus = 16
-	// If job fails, try again with more memory
-	memory { 40.GB * task.attempt }
-    //memory 40.GB
-    errorStrategy 'terminate'
-    //errorStrategy 'retry'
-    //errorStrategy 'ignore'
-
-    // Use conda env defined in nextflow.config file
-    // TODO - make a singularity container
-    conda params.conda_wochenende
-
-
     tag "$name"
-    label 'process_medium'
-    
-       
+    label 'process_medium'   
     if (params.save_align_intermeds) {
         publishDir path: "${params.outdir}/wochenende", mode: params.publish_dir_mode,
             saveAs: { filename ->
@@ -323,12 +308,8 @@ process wochenende {
                           else filename
                     }
     }
-    
-
-
     input:
     file fastq
-
 
     output:
     path "*.s.bam", emit: s_bams
@@ -345,7 +326,6 @@ process wochenende {
     path "*.calmd.bam.txt", emit: calmd_bam_txts
     //path "*.*", emit: all       // lets avoid this, else we get scripts in the output dir
     
-
     script:
     name = fastq
     //prefix = fastq.name.toString().tokenize('.').get(0)
@@ -356,8 +336,6 @@ process wochenende {
     if (params.readType == "PE") {
         println "Derived FASTQ R2 from R1 as: " + fastq_R2
     }
-
-
 
     """
     export WOCHENENDE_DIR=${params.WOCHENENDE_DIR}
@@ -388,16 +366,10 @@ process wochenende {
  */
 
 process reporting {
-    cpus = 1
-
-    conda params.conda_wochenende
-    errorStrategy 'ignore'
-    //errorStrategy 'terminate'
     
     tag "$name"
     label 'process_medium'
     publishDir path: "${params.outdir}/reporting", mode: params.publish_dir_mode
-	
 
     input:
     file bamtxt
@@ -427,15 +399,8 @@ process reporting {
 
 process haybaler {
 
-    cpus = 1
-
-    conda params.conda_haybaler
-	//errorStrategy 'ignore'
-    errorStrategy 'terminate'
-    
     tag "$name"
     label 'process_medium'
-
     publishDir path: "${params.outdir}/haybaler", mode: params.publish_dir_mode
 
     input:
@@ -460,10 +425,6 @@ process haybaler {
     cp ${params.WOCHENENDE_DIR}/haybaler/run_haybaler.sh .
 
     bash run_haybaler.sh ${params.haybaler_readcount_limit} ${params.haybaler_rpmm_limit}
-
-
-
-
     """
 }
 
@@ -544,20 +505,9 @@ process heatmaps {
 
 process plots {
 
-    cpus = 1
-    // If job fails, try again with more memory if retry set
-    memory { 8.GB * task.attempt }
-    //errorStrategy 'terminate'
-    errorStrategy 'ignore'
-    //errorStrategy 'retry'
-
-    // Use conda env defined in nextflow.config file
-    conda params.conda_wochenende
-
     tag "$name"
     label 'process_medium'
     
-       
     if (params.save_align_intermeds) {
         publishDir path: "${params.outdir}/plots", mode: params.publish_dir_mode,
             saveAs: { filename ->
@@ -565,19 +515,14 @@ process plots {
                           else filename
                     }
     }
-    
-
-
     input:
     file bam
     file bai
-
 
     output:
     path "plots/images/*"
     path "*.calmd_cov_window.txt", emit: window_txt
     
-
     script:
     prefix = bam.name.toString().tokenize('.').get(0)
     name = bam
@@ -596,10 +541,7 @@ process plots {
     cp ../*_window.txt.filt.csv .
     bash runbatch_wochenende_plot.sh
     
-        
     echo "INFO: Completed Wochenende plot"
-
-
     """
 }
 
@@ -611,20 +553,8 @@ process plots {
 
 process growth_rate {
 
-    cpus = 1
-    // If job fails, try again with more memory
-    memory { 32.GB * task.attempt }
-    //errorStrategy 'terminate'
-    errorStrategy 'ignore'
-    //errorStrategy 'retry'
-
-    // Use conda env defined in nextflow.config file
-    conda params.conda_wochenende
-
     tag "$name"
     label 'process_medium'
-    
-       
     if (params.save_align_intermeds) {
         publishDir path: "${params.outdir}/growth_rate", mode: params.publish_dir_mode,
             saveAs: { filename ->
@@ -633,14 +563,10 @@ process growth_rate {
                           else filename
                     }
     }
-    
-
-
     input:
     file bam
     file bai
     file bam_txt
-
 
     output:
     //file "growth_rate/*"
@@ -655,8 +581,6 @@ process growth_rate {
     cp -R ${params.WOCHENENDE_DIR}/growth_rate/ .
     cp -R ${params.WOCHENENDE_DIR}/scripts/ .
     cp scripts/*.sh .
-
-
     echo "INFO: Started bacterial growth rate analysis"
     cp growth_rate/* .
         
@@ -665,8 +589,6 @@ process growth_rate {
     bash run_reproduction_determiner.sh
      
     echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
-
-
     """
 }
 
@@ -679,20 +601,8 @@ process growth_rate {
 
 process raspir_fileprep {
 
-    cpus = 8
-    // If job fails, try again with more memory
-    memory { 8.GB * task.attempt }
-    //errorStrategy 'terminate'
-    errorStrategy 'ignore'
-    //errorStrategy 'retry'
-
-    // Use conda env defined in nextflow.config file
-    conda params.conda_haybaler
-
     tag "$name"
     label 'process_medium'
-    
-
 
     input:
     file bam
@@ -714,7 +624,6 @@ process raspir_fileprep {
     bash run_SLURM_file_prep.sh $bam 
          
     echo "INFO: Completed raspir module"
-
     """
   
 }
@@ -725,16 +634,6 @@ process raspir_fileprep {
  */
 
 process raspir {
-
-    cpus = 1
-    // If job fails, try again with more memory
-    memory { 8.GB * task.attempt }
-    //errorStrategy 'terminate'
-    errorStrategy 'ignore'
-    //errorStrategy 'retry'
-
-    // Use conda env defined in nextflow.config file
-    conda params.conda_haybaler
 
     tag "$name"
     label 'process_medium'
@@ -747,9 +646,6 @@ process raspir {
                           else filename
                     }
     }
-    
-
-
     input:
     file input_csv
     //each file input_csv
@@ -777,20 +673,11 @@ process raspir {
 
 
 
-
 /*
  *  Convert BAM to coordinate sorted BAM, make stats, flagstat, idxstats
  */
 
 process convert_bam_cram {
-
-    cpus = 8
-    // If job fails, try again with more memory
-    memory { 32.GB * task.attempt }
-    errorStrategy 'retry'
-
-    // Use conda env defined in nextflow.config file
-    conda params.conda_haybaler
 
     tag "$name"
     label 'process_medium'
@@ -802,7 +689,6 @@ process convert_bam_cram {
                     }
     }
 
-
     input:
     file bam
     file bai
@@ -813,7 +699,6 @@ process convert_bam_cram {
     output:
     file "${prefix}.cram"
     file "${prefix}.cram.crai"
-
 
     script:
     prefix = bam.name.toString().tokenize('.').get(0)
@@ -837,14 +722,6 @@ process convert_bam_cram {
  */
 
 process multiqc {
-    cpus = 1
-    // If job fails, try again with more memory
-    memory { 4.GB * task.attempt }
-    //errorStrategy 'terminate'
-    errorStrategy 'ignore'
-
-    // TODO - singularity 
-    conda '/home/hpc/davenpor/programs/miniconda3/envs/bioinf/'
     
     tag "$name"
     label 'process_medium'

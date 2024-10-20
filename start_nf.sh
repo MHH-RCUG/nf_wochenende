@@ -11,7 +11,7 @@ unset WOCHENENDE_DIR
 unset HAYBALER_DIR
 
 # cleanup work/ 
-rm -rf work
+#rm -rf work
 
 
 ############
@@ -19,4 +19,4 @@ rm -rf work
 ###########
 
 # Set reference and parameters in nextflow.config
-nextflow run nf_wochenende.nf  -with-timeline -with-report --fastq *R1.fastq 
+nextflow run nf_wochenende.nf  -with-timeline -with-report --fastq *R1.fastq -resume
