@@ -83,7 +83,6 @@ params.trim_galore = ""
 
 
 
-
 // Show help message
 if (params.help) {
     helpMessage()
@@ -98,7 +97,7 @@ if (params.help) {
 workflow {
 
     println "Starting nf_wochenende.nf"
-    println "Version 0.1.4 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
+    println "Version 0.1.5 by Colin Davenport, Tobias Scheithauer, Ilona Rosenboom and Lisa Hollstein with many further contributors"
 
     // File inputs
     // R1 Read inputs, R2 reads are linked in by the process if they exist.
@@ -295,6 +294,8 @@ workflow {
 
 process wochenende {
 
+    conda params.conda_wochenende
+    
     tag "$name"
     label 'process_medium'   
     if (params.save_align_intermeds) {

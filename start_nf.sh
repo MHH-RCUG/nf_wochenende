@@ -1,6 +1,7 @@
 #!/bin/bash
 echo "Starting the nf_wochenende pipeline"
-echo "Requires nextflow in path. In case of problems, activate environment: conda activate wochenende"
+echo "Requires nextflow in path. In case of problems, activate environment: conda activate wochenende OR pixi shell"
+echo "If stages repeatedly break down with the current dataset, set them to to false in the nextflow.config"
 
 #get most current version - for developers
 #git pull -q
