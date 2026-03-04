@@ -1,12 +1,19 @@
 
 # nf_wochenende - a nextflow implementation of the Wochenende pipeline
 
-**See documentation on our Wiki** at https://github.com/MHH-RCUG/nf_wochenende/wiki
-
 This is a portable version of the metagenomic alignment pipeline Wochenende which uses Nextflow. This should allow most users to use Wochenende more easily and efficiently.
 
-
 Wochenende runs alignment of short reads (eg Illumina) or long reads (eg Oxford Nanopore) against a reference sequence. It is relevant for genomics and metagenomics. Wochenende is simple (python script), portable and is easy to configure with a central config file. 
+
+
+# Documentation
+
+## Our Wiki
+**See documentation on our Wiki** at https://github.com/MHH-RCUG/nf_wochenende/wiki
+
+## Comprehensive AI generated docs at deepwiki
+https://deepwiki.com/MHH-RCUG/nf_wochenende
+
 
 
 
